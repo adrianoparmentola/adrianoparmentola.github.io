@@ -1,9 +1,7 @@
 import { defineConfig } from 'astro/config';
 
-// Sito statico su GitHub Pages, scelta "repo utente" (<username>.github.io).
+// Sito statico su GitHub Pages, scelta "repo utente" (adrianoparmentola.github.io).
 // base '/' è corretto per questo tipo di repo.
-// ⚠️ SOSTITUISCI "adrianoparmentola" con il tuo vero username GitHub qui sotto:
-// serve solo per URL assoluti (canonical/OG), gli asset funzionano comunque.
 export default defineConfig({
   site: 'https://adrianoparmentola.github.io',
   base: '/',
