@@ -1,0 +1,90 @@
+---
+// Canali confermati dall'utente: tutto tranne il telefono (che resta solo
+// dentro CV/menù scaricabili).
+import { profile } from '../lib/profile';
+import { useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<section class="contact">
+  <h1 class="reveal">{t('nav.contact')}</h1>
+
+  <ul class="channels reveal" style="--delay: 100ms">
+    <li>
+      <span class="meta-tag">Email</span>
+      <a href={`mailto:${profile.email}`}>{profile.email}</a>
+    </li>
+    <li>
+      <span class="meta-tag">Instagram</span>
+      <a href={profile.instagram.url} target="_blank" rel="noopener">{profile.instagram.handle}</a>
+    </li>
+    <li>
+      <span class="meta-tag">LinkedIn</span>
+      <a href={profile.linkedin.url} target="_blank" rel="noopener">{profile.linkedin.handle}</a>
+    </li>
+  </ul>
+
+  <a class="cta reveal" style="--delay: 200ms" href={profile.cvPath} download>
+    {t('background.cv')} ↓
+  </a>
+</section>
+
+<style>
+  .contact {
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: var(--space-8) var(--space-4) var(--space-12);
+  }
+
+  h1 {
+    font-size: var(--text-display-small);
+    letter-spacing: -0.01em;
+  }
+
+  .channels {
+    list-style: none;
+    margin: var(--space-4) 0;
+    padding: 0;
+    display: grid;
+    gap: var(--space-2);
+    max-width: 32rem;
+  }
+
+  .channels li {
+    display: grid;
+    grid-template-columns: 7rem 1fr;
+    align-items: baseline;
+    gap: var(--space-2);
+    border-bottom: 1px solid var(--color-border);
+    padding-bottom: var(--space-2);
+  }
+
+  .channels a {
+    font-size: var(--text-h3);
+    font-weight: var(--weight-bold);
+  }
+
+  .channels a:hover {
+    color: var(--color-accent);
+  }
+
+  .cta {
+    display: inline-block;
+    font-weight: var(--weight-bold);
+    border: 1px solid var(--color-text);
+    padding: 0.7rem 1.4rem;
+    border-radius: 999px;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .cta:hover {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+</style>

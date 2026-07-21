@@ -1,0 +1,25 @@
+---
+import { getEntry } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import ProjectDetail from '../../../sections/ProjectDetail.astro';
+import { getPublishedProjects, getProjectCopy } from '../../../lib/content';
+
+const lang = 'es' as const;
+
+export async function getStaticPaths() {
+  const metas = await getPublishedProjects();
+  return metas.map((meta) => ({ params: { slug: meta.id }, props: { slug: meta.id } }));
+}
+
+const { slug } = Astro.props;
+const meta = await getEntry('projectMeta', slug);
+const copy = await getProjectCopy(slug, lang);
+
+if (!meta || !copy) {
+  return Astro.redirect(`/${lang}/projects/`);
+}
+---
+
+<BaseLayout lang={lang} title={copy.data.title}>
+  <ProjectDetail meta={meta} copy={copy} lang={lang} />
+</BaseLayout>

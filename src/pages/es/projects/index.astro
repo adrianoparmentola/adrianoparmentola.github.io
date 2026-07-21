@@ -1,0 +1,12 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import ProjectsIndex from '../../../sections/ProjectsIndex.astro';
+import { useTranslations } from '../../../i18n/ui';
+
+const lang = 'es' as const;
+const t = useTranslations(lang);
+---
+
+<BaseLayout lang={lang} title={t('nav.projects')}>
+  <ProjectsIndex lang={lang} />
+</BaseLayout>

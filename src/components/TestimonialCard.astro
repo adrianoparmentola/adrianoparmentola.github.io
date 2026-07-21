@@ -1,0 +1,61 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  testimonial: CollectionEntry<'testimonials'>;
+}
+
+const { testimonial } = Astro.props;
+const { name, role, linkedin, quote, rating } = testimonial.data;
+---
+
+<a class="testimonial-card" href={linkedin} target="_blank" rel="noopener noreferrer">
+  <div class="head">
+    <span class="name">{name}</span>
+    {rating && <span class="rating">{'★'.repeat(Math.round(rating))}</span>}
+  </div>
+  {role && <p class="role meta-tag">{role}</p>}
+  <p class="quote">{quote}</p>
+</a>
+
+<style>
+  .testimonial-card {
+    display: block;
+    padding: var(--space-3);
+    border: 1px solid var(--color-border);
+    border-radius: 1.25rem;
+    background: var(--color-bg);
+    transition: border-color 0.2s ease;
+  }
+
+  .testimonial-card:hover {
+    border-color: var(--color-accent);
+    color: var(--color-text);
+  }
+
+  .head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
+
+  .name {
+    font-weight: var(--weight-bold);
+  }
+
+  .rating {
+    color: var(--color-accent);
+    font-size: var(--text-meta);
+    letter-spacing: 0.1em;
+  }
+
+  .role {
+    margin: 0.25rem 0 var(--space-2);
+  }
+
+  .quote {
+    margin: 0;
+    line-height: 1.5;
+  }
+</style>

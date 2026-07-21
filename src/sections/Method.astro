@@ -1,0 +1,180 @@
+---
+// Pagina "Metodo": il ciclo DMAIC raccontato con gli artefatti reali della
+// tesi Hum.us (nessuna spiegazione didattica - ogni fase mostra il documento
+// vero e linka al punto del caso studio). Chiude con azioni concrete.
+import { Image } from 'astro:assets';
+import { getProjectAsset } from '../lib/images';
+import { useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+// Fase -> artefatto reale (ritagliato dalla tesi, già in humus/assets)
+const PHASES = [
+  { letter: 'D', name: 'Define', asset: 'dmaic-scheme.webp' },
+  { letter: 'M', name: 'Measure', asset: 'measure-questionnaire.webp' },
+  { letter: 'A', name: 'Analyze', asset: 'analyze-benchmark.webp' },
+  { letter: 'I', name: 'Improve', asset: 'triz-solutions.webp' },
+  { letter: 'C', name: 'Control', asset: 'kpi-panel.webp' },
+].map((p) => ({ ...p, image: getProjectAsset('humus', p.asset) }));
+
+const TOOLS = ['QFD', 'Kano', 'TRIZ', 'Gemba Walk', 'SWOT', 'Benchmark'];
+---
+
+<section class="method">
+  <ol class="phases">
+    {
+      PHASES.map((p, i) => (
+        <li class="phase">
+          <div class="letter-col">
+            <span class="letter reveal">{p.letter}</span>
+          </div>
+          <div class="content reveal" style="--delay: 100ms">
+            <p class="name meta-tag">{p.name}</p>
+            {p.image && (
+              <Image
+                src={p.image}
+                alt={p.name}
+                widths={[640, 1200]}
+                sizes="(max-width: 900px) 100vw, 60vw"
+              />
+            )}
+            <a class="applied meta-tag" href={`/${lang}/projects/humus/`}>
+              {t('method.applied')} →
+            </a>
+          </div>
+        </li>
+      ))
+    }
+  </ol>
+
+  <ul class="tool-wall reveal">
+    {TOOLS.map((tool) => <li>{tool}</li>)}
+  </ul>
+
+  <div class="actions reveal">
+    <a class="cta" href={`/${lang}/cases/`}>{t('method.cta')} →</a>
+    <a class="cta ghost" href={`/${lang}/contact/`}>{t('home.cta.contact')}</a>
+  </div>
+</section>
+
+<style>
+  .method {
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: var(--space-6) var(--space-4);
+  }
+
+  .phases {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .phase {
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+    gap: var(--space-4);
+    padding: var(--space-6) 0;
+    border-top: 1px solid var(--color-text);
+  }
+
+  .letter-col {
+    position: relative;
+  }
+
+  .letter {
+    position: sticky;
+    top: var(--space-4);
+    display: block;
+    font-size: clamp(6rem, 18vw, 14rem);
+    font-weight: var(--weight-bold);
+    line-height: 0.85;
+    letter-spacing: -0.03em;
+  }
+
+  .phase:hover .letter {
+    color: var(--color-accent);
+  }
+
+  .name {
+    margin-bottom: var(--space-2);
+  }
+
+  .content :global(img) {
+    width: 100%;
+    height: auto;
+  }
+
+  .applied {
+    display: inline-block;
+    margin-top: var(--space-2);
+    border-bottom: 1px solid currentColor;
+  }
+
+  .applied:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+
+  .tool-wall {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-4);
+    list-style: none;
+    margin: 0;
+    padding: var(--space-6) 0;
+    border-top: 1px solid var(--color-text);
+  }
+
+  .tool-wall li {
+    font-size: var(--text-h2);
+    font-weight: var(--weight-bold);
+    color: var(--color-text-muted);
+  }
+
+  .tool-wall li:hover {
+    color: var(--color-accent);
+  }
+
+  .actions {
+    display: flex;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+    padding-top: var(--space-4);
+  }
+
+  .cta {
+    font-weight: var(--weight-bold);
+    border: 1px solid var(--color-text);
+    padding: 0.7rem 1.4rem;
+    border-radius: 999px;
+    transition: background 0.2s, border-color 0.2s;
+  }
+
+  .cta:hover {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-text);
+  }
+
+  .cta.ghost {
+    border-color: var(--color-text-muted);
+    font-weight: var(--weight-regular, 400);
+  }
+
+  @media (max-width: 900px) {
+    .phase {
+      grid-template-columns: 1fr;
+    }
+
+    .letter {
+      position: static;
+      font-size: clamp(4rem, 20vw, 8rem);
+    }
+  }
+</style>

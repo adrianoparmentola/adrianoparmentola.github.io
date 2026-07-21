@@ -1,0 +1,348 @@
+---
+// Home ristrutturata su reference houseplant.com: hero video full-bleed con
+// il claim di TALEA, tre colonne-categoria piene, marquee tecnologie,
+// referenze + background (menù 3D, CV, lingue, Gallup, speed tasks), CTA.
+import { Image } from 'astro:assets';
+import TestimonialCard from '../components/TestimonialCard.astro';
+import ModelViewer from '../components/ModelViewer.astro';
+import Marquee from '../components/Marquee.astro';
+import { getCollection } from 'astro:content';
+import { getProjectAsset } from '../lib/images';
+import { profile } from '../lib/profile';
+import { useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const testimonials = await getCollection('testimonials');
+
+// Immagini delle colonne-categoria (scelte con l'utente)
+const CATEGORIES = [
+  { key: 'servizi', image: getProjectAsset('safe-to-work', 'hero.webp') },
+  { key: 'prodotti', image: getProjectAsset('cartesio', 'hero.webp') },
+  { key: 'spazi', image: getProjectAsset('talea', 'hero.webp') },
+] as const;
+
+const MARQUEE_ITEMS = ['Six Sigma', 'DMAIC', 'QFD', 'Kano', 'TRIZ', 'Service Design', 'VRED', 'Blender'];
+---
+
+<section class="hero">
+  <video src="/videos/hero-talea.mp4" autoplay muted loop playsinline aria-hidden="true"></video>
+  <div class="overlay">
+    <h1 class="claim reveal">{t('home.claim')}</h1>
+    <p class="role reveal" style="--delay: 120ms">{t('home.role')}</p>
+    <div class="cta-row reveal" style="--delay: 240ms">
+      <a class="cta" href={`/${lang}/method/`}>{t('home.cta.method')} →</a>
+      <a class="cta ghost" href={`/${lang}/contact/`}>{t('home.cta.contact')}</a>
+    </div>
+  </div>
+</section>
+
+<section class="categories">
+  {
+    CATEGORIES.map((cat, i) => (
+      <a class="category reveal" style={`--delay: ${i * 100}ms`} href={`/${lang}/projects/#${cat.key}`}>
+        {cat.image && (
+          <Image
+            src={cat.image}
+            alt={t(`cat.${cat.key}`)}
+            widths={[480, 800, 1200]}
+            sizes="(max-width: 900px) 100vw, 33vw"
+          />
+        )}
+        <span class="num meta-tag">0{i + 1}</span>
+        <span class="label">{t(`cat.${cat.key}`)}</span>
+      </a>
+    ))
+  }
+</section>
+
+<Marquee items={MARQUEE_ITEMS} />
+
+<section class="background" id="background">
+  <h2 class="reveal">{t('background.title')}</h2>
+
+  <div class="testimonial-grid">
+    {testimonials.map((tst, i) => (
+      <div class="reveal" style={`--delay: ${i * 80}ms`}>
+        <TestimonialCard testimonial={tst} />
+      </div>
+    ))}
+  </div>
+
+  <div class="bg-grid">
+    <div class="menu-3d reveal">
+      <ModelViewer src="/models/home/menu.glb" alt={t('background.menu')} lang={lang} variant="hero" />
+      <p class="meta-tag">{t('background.menu')}</p>
+      <a class="cta small" href={profile.cvPath} download>{t('background.cv')} ↓</a>
+    </div>
+    <div class="facts reveal" style="--delay: 120ms">
+      <div class="fact-block">
+        <h3 class="meta-tag">{t('speed.title')}</h3>
+        <ul class="speed">
+          <li>
+            <strong>{t('speed.interiors')}</strong>
+            <span>{t('speed.interiors.desc')}</span>
+            <span class="days meta-tag">7 {t('speed.days')}</span>
+          </li>
+          <li>
+            <strong>{t('speed.identity')}</strong>
+            <span>{t('speed.identity.desc')}</span>
+            <span class="days meta-tag">12 {t('speed.days')}</span>
+          </li>
+        </ul>
+      </div>
+      <div class="fact-block">
+        <h3 class="meta-tag">{t('background.languages')}</h3>
+        <ul>
+          {profile.languages.map((l) => <li>{l}</li>)}
+        </ul>
+      </div>
+      <div class="fact-block">
+        <h3 class="meta-tag">{t('background.gallup')}</h3>
+        <ul>
+          {profile.gallupTop.map((g, i) => <li>{i + 1}. {g}</li>)}
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="contact-band reveal">
+  <h2>{t('home.cta.contact')}</h2>
+  <a class="cta" href={`/${lang}/contact/`}>{t('nav.contact')} →</a>
+</section>
+
+<style>
+  /* Hero video full-bleed con claim sovrapposto */
+  .hero {
+    position: relative;
+    min-height: 82vh;
+    overflow: hidden;
+    display: flex;
+    align-items: flex-end;
+  }
+
+  .hero video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .overlay {
+    position: relative;
+    width: 100%;
+    padding: var(--space-6) var(--space-4);
+    background: linear-gradient(to top, rgb(20 20 20 / 0.55), transparent);
+    color: #fff;
+  }
+
+  .claim {
+    font-size: var(--text-display);
+    font-weight: var(--weight-bold);
+    line-height: 0.95;
+    letter-spacing: -0.02em;
+    max-width: 12ch;
+  }
+
+  .role {
+    margin-top: var(--space-2);
+    font-size: var(--text-h3);
+    font-weight: var(--weight-light);
+  }
+
+  .cta-row {
+    display: flex;
+    gap: var(--space-2);
+    margin-top: var(--space-3);
+    flex-wrap: wrap;
+  }
+
+  .cta {
+    font-weight: var(--weight-bold);
+    border: 1px solid currentColor;
+    padding: 0.7rem 1.4rem;
+    border-radius: 999px;
+    transition: background 0.2s, color 0.2s, border-color 0.2s;
+  }
+
+  .cta:hover {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-text);
+  }
+
+  .cta.ghost {
+    font-weight: var(--weight-regular);
+  }
+
+  .cta.small {
+    display: inline-block;
+    margin-top: var(--space-2);
+    padding: 0.5rem 1.1rem;
+  }
+
+  /* Colonne-categoria stile houseplant: immagine piena + parola grande */
+  .categories {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .category {
+    position: relative;
+    display: block;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+  }
+
+  .category :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.6s cubic-bezier(0.2, 0.6, 0.2, 1);
+  }
+
+  .category:hover :global(img) {
+    transform: scale(1.04);
+  }
+
+  .category .num {
+    position: absolute;
+    top: var(--space-2);
+    left: var(--space-2);
+    color: #fff;
+  }
+
+  .category .label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: var(--text-h2);
+    font-weight: var(--weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+    text-shadow: 0 2px 24px rgb(0 0 0 / 0.45);
+  }
+
+  .category:hover .label {
+    color: var(--color-accent);
+  }
+
+  /* Referenze & background */
+  .background {
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: var(--space-8) var(--space-4);
+  }
+
+  .background h2 {
+    font-size: var(--text-h2);
+  }
+
+  .testimonial-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-3);
+    margin-top: var(--space-3);
+  }
+
+  .bg-grid {
+    display: grid;
+    grid-template-columns: 5fr 7fr;
+    gap: var(--space-6);
+    margin-top: var(--space-6);
+    align-items: start;
+  }
+
+  /* Il pannello "curriculum" (speed tasks, lingue, Gallup) ha una superficie
+     tinta di lime che lo stacca cromaticamente dal biglietto da visita 3D,
+     che resta su off-white pulito. */
+  .facts {
+    display: grid;
+    gap: var(--space-4);
+    background: color-mix(in srgb, var(--color-accent) 14%, var(--color-bg));
+    border: 1px solid color-mix(in srgb, var(--color-accent) 45%, var(--color-bg));
+    border-radius: 12px;
+    padding: var(--space-4);
+  }
+
+  .fact-block h3 {
+    border-bottom: 2px solid var(--color-accent);
+    padding-bottom: var(--space-1);
+    margin-bottom: var(--space-2);
+    color: var(--color-text);
+  }
+
+  .fact-block ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .speed li {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: var(--space-2);
+    align-items: baseline;
+  }
+
+  .speed .days {
+    background: var(--color-accent);
+    color: var(--color-text);
+    padding: 0.1rem 0.6rem;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+
+  .contact-band {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+    border-top: 1px solid var(--color-text);
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: var(--space-6) var(--space-4) var(--space-8);
+  }
+
+  .contact-band h2 {
+    font-size: var(--text-h1);
+    letter-spacing: -0.01em;
+  }
+
+  @media (max-width: 900px) {
+    .categories {
+      grid-template-columns: 1fr;
+    }
+
+    .category {
+      aspect-ratio: 16 / 10;
+    }
+
+    .testimonial-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .bg-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .category :global(img) {
+      transition: none;
+    }
+  }
+</style>

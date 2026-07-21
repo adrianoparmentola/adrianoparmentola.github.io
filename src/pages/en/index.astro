@@ -1,0 +1,12 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Home from '../../sections/Home.astro';
+import { useTranslations } from '../../i18n/ui';
+
+const lang = 'en' as const;
+const t = useTranslations(lang);
+---
+
+<BaseLayout lang={lang} title={t('nav.home')}>
+  <Home lang={lang} />
+</BaseLayout>

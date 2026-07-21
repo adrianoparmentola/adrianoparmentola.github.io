@@ -1,0 +1,68 @@
+{
+  "name": "Punti di Vista — TALEA",
+  "type": "installazione",
+  "status": "include",
+  "featured": true,
+  "methodTags": [],
+  "assets": [
+    {
+      "src": "hero.webp",
+      "kind": "image",
+      "role": "hero",
+      "caption": "Il totem installato sul posto"
+    },
+    {
+      "src": "/videos/talea-render.mp4",
+      "kind": "video",
+      "wide": true,
+      "caption": "Totem — animazione render"
+    },
+    {
+      "src": "brand-identity.webp",
+      "kind": "image",
+      "caption": "Brand identity — palette, tipografia, logo"
+    },
+    {
+      "src": "identity-forms.webp",
+      "kind": "image",
+      "caption": "Brand identity — le forme metaball"
+    },
+    {
+      "src": "/videos/talea-identity.mp4",
+      "kind": "video",
+      "caption": "Identità in movimento"
+    },
+    {
+      "src": "totem-structure.webp",
+      "kind": "image",
+      "caption": "Struttura del totem"
+    },
+    {
+      "src": "totem-configs.webp",
+      "kind": "image",
+      "caption": "Configurazioni modulari"
+    },
+    {
+      "src": "ui-components.webp",
+      "kind": "image",
+      "caption": "Componenti UI"
+    },
+    {
+      "src": "system-map.webp",
+      "kind": "image",
+      "caption": "Mappa di sistema"
+    },
+    {
+      "src": "poster-50.webp",
+      "kind": "image",
+      "caption": "Poster di progetto"
+    },
+    {
+      "src": "cover.webp",
+      "kind": "image",
+      "caption": "Copertina della presentazione"
+    }
+  ],
+  "year": "2026",
+  "category": "spazi"
+}

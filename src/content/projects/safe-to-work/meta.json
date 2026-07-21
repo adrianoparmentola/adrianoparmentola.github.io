@@ -1,0 +1,26 @@
+{
+  "name": "SAFE2WORK",
+  "type": "campagna",
+  "status": "include",
+  "featured": false,
+  "methodTags": [],
+  "assets": [
+    {
+      "src": "hero.webp",
+      "kind": "image",
+      "role": "hero"
+    },
+    {
+      "src": "label-tag.webp",
+      "kind": "image",
+      "role": "gallery"
+    },
+    {
+      "src": "app-icon.webp",
+      "kind": "image",
+      "role": "gallery"
+    }
+  ],
+  "year": "2025",
+  "category": "servizi"
+}

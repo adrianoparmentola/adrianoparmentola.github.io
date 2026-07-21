@@ -1,0 +1,93 @@
+{
+  "name": "Rendering Automatico",
+  "type": "skill-demo",
+  "status": "demo",
+  "featured": false,
+  "methodTags": [
+    "VRED",
+    "Blender"
+  ],
+  "assets": [
+    {
+      "src": "render-01.webp",
+      "kind": "image",
+      "role": "hero",
+      "caption": "Render finale"
+    },
+    {
+      "src": "render-02.webp",
+      "kind": "image",
+      "caption": "Render verticale"
+    },
+    {
+      "src": "render-03.webp",
+      "kind": "image",
+      "caption": "Render orizzontale"
+    },
+    {
+      "src": "mockup.webp",
+      "kind": "image",
+      "caption": "Mockup della camera"
+    },
+    {
+      "src": "slide-01.webp",
+      "kind": "image",
+      "wide": true,
+      "caption": "Presentazione — 1 di 10"
+    },
+    {
+      "src": "slide-02.webp",
+      "kind": "image",
+      "wide": true,
+      "caption": "Presentazione — 2 di 10"
+    },
+    {
+      "src": "slide-03.webp",
+      "kind": "image",
+      "wide": true,
+      "caption": "Presentazione — 3 di 10"
+    },
+    {
+      "src": "slide-04.webp",
+      "kind": "image",
+      "wide": true,
+      "caption": "Presentazione — 4 di 10"
+    },
+    {
+      "src": "slide-05.webp",
+      "kind": "image",
+      "wide": true,
+      "caption": "Presentazione — 5 di 10"
+    },
+    {
+      "src": "slide-06.webp",
+      "kind": "image",
+      "wide": true,
+      "caption": "Presentazione — 6 di 10"
+    },
+    {
+      "src": "slide-07.webp",
+      "kind": "image",
+      "wide": true,
+      "caption": "Presentazione — 7 di 10"
+    },
+    {
+      "src": "slide-08.webp",
+      "kind": "image",
+      "wide": true,
+      "caption": "Presentazione — 8 di 10"
+    },
+    {
+      "src": "slide-09.webp",
+      "kind": "image",
+      "wide": true,
+      "caption": "Presentazione — 9 di 10"
+    },
+    {
+      "src": "slide-10.webp",
+      "kind": "image",
+      "wide": true,
+      "caption": "Presentazione — 10 di 10"
+    }
+  ]
+}

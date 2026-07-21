@@ -1,0 +1,102 @@
+{
+  "name": "(con)tatto / (n)o",
+  "year": "2026",
+  "type": "servizio",
+  "category": "servizi",
+  "status": "include",
+  "featured": true,
+  "methodTags": [
+    "Thirdplace",
+    "D4Longevity",
+    "Community"
+  ],
+  "assets": [
+    {
+      "src": "hero.webp",
+      "kind": "image",
+      "role": "hero",
+      "caption": "Copertina della campagna"
+    },
+    {
+      "src": "poster-a2-01.webp",
+      "kind": "image",
+      "caption": "Serie poster A2 — 1 di 3"
+    },
+    {
+      "src": "poster-a2-02.webp",
+      "kind": "image",
+      "caption": "Serie poster A2 — 2 di 3"
+    },
+    {
+      "src": "poster-a2-03.webp",
+      "kind": "image",
+      "caption": "Serie poster A2 — 3 di 3"
+    },
+    {
+      "src": "detail-print.webp",
+      "kind": "image",
+      "wide": true,
+      "caption": "Stampa A0 — panoramica del servizio"
+    },
+    {
+      "src": "identity-01.webp",
+      "kind": "image",
+      "caption": "Identità visiva"
+    },
+    {
+      "src": "identity-02.webp",
+      "kind": "image",
+      "caption": "Identità visiva — applicazioni"
+    },
+    {
+      "src": "touchpoint-01.webp",
+      "kind": "image",
+      "caption": "Touchpoint del servizio"
+    },
+    {
+      "src": "touchpoint-02.webp",
+      "kind": "image",
+      "caption": "Touchpoint — leaflet e totem"
+    },
+    {
+      "src": "touchpoint-03.webp",
+      "kind": "image",
+      "caption": "Touchpoint — cartoline"
+    },
+    {
+      "src": "mockup-flyer.webp",
+      "kind": "image",
+      "caption": "Mockup del leaflet"
+    },
+    {
+      "src": "mockup-stand.webp",
+      "kind": "image",
+      "caption": "Mockup del totem urbano"
+    },
+    {
+      "src": "mockup-fence.webp",
+      "kind": "image",
+      "caption": "I poster nel contesto urbano di Pianoro"
+    },
+    {
+      "src": "field-01.webp",
+      "kind": "image",
+      "caption": "Ricerca sul campo a Pianoro"
+    },
+    {
+      "src": "field-02.webp",
+      "kind": "image",
+      "caption": "Ricerca sul campo a Pianoro"
+    },
+    {
+      "src": "field-03.webp",
+      "kind": "image",
+      "caption": "Ricerca sul campo a Pianoro"
+    },
+    {
+      "src": "field-04.webp",
+      "kind": "image",
+      "caption": "Ricerca sul campo a Pianoro"
+    }
+  ]
+}

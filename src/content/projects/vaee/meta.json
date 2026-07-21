@@ -1,0 +1,16 @@
+{
+  "name": "Vaee",
+  "type": "prodotto",
+  "status": "include",
+  "featured": false,
+  "methodTags": [],
+  "assets": [
+    {
+      "src": "hero.webp",
+      "kind": "image",
+      "role": "hero"
+    }
+  ],
+  "year": "2022",
+  "category": "prodotti"
+}

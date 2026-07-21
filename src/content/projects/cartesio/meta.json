@@ -1,0 +1,30 @@
+{
+  "name": "Cartesio",
+  "type": "prodotto",
+  "status": "include",
+  "featured": false,
+  "methodTags": [],
+  "assets": [
+    {
+      "src": "hero.webp",
+      "kind": "image",
+      "role": "hero"
+    },
+    {
+      "src": "detail.webp",
+      "kind": "image",
+      "role": "gallery"
+    },
+    {
+      "src": "landscape.webp",
+      "kind": "image",
+      "role": "gallery"
+    },
+    {
+      "src": "portrait.webp",
+      "kind": "image",
+      "role": "thumb"
+    }
+  ],
+  "category": "prodotti"
+}

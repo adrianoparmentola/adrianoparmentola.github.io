@@ -1,0 +1,79 @@
+{
+  "name": "AutonoMIA",
+  "year": "2024-2025",
+  "type": "prodotto",
+  "status": "include",
+  "featured": true,
+  "methodTags": [],
+  "assets": [
+    {
+      "src": "hero.webp",
+      "kind": "image",
+      "role": "hero",
+      "caption": "Il sistema di pentole sul piano a induzione"
+    },
+    {
+      "src": "angle-02.webp",
+      "kind": "image",
+      "caption": "Render da studio"
+    },
+    {
+      "src": "angle-03.webp",
+      "kind": "image",
+      "caption": "Vista frontale"
+    },
+    {
+      "src": "product.webp",
+      "kind": "image",
+      "caption": "Scatto prodotto"
+    },
+    {
+      "src": "functions-analysis.webp",
+      "kind": "image",
+      "caption": "Analisi funzionale"
+    },
+    {
+      "src": "tavola-01.webp",
+      "kind": "image",
+      "wide": true,
+      "caption": "Tavole d'esame — 1 di 7"
+    },
+    {
+      "src": "tavola-02.webp",
+      "kind": "image",
+      "wide": true,
+      "caption": "Tavole d'esame — 2 di 7"
+    },
+    {
+      "src": "tavola-03.webp",
+      "kind": "image",
+      "wide": true,
+      "caption": "Tavole d'esame — 3 di 7"
+    },
+    {
+      "src": "tavola-04.webp",
+      "kind": "image",
+      "wide": true,
+      "caption": "Tavole d'esame — 4 di 7"
+    },
+    {
+      "src": "tavola-05.webp",
+      "kind": "image",
+      "wide": true,
+      "caption": "Tavole d'esame — 5 di 7"
+    },
+    {
+      "src": "tavola-06.webp",
+      "kind": "image",
+      "wide": true,
+      "caption": "Tavole d'esame — 6 di 7"
+    },
+    {
+      "src": "tavola-07.webp",
+      "kind": "image",
+      "wide": true,
+      "caption": "Tavole d'esame — 7 di 7"
+    }
+  ],
+  "category": "prodotti"
+}

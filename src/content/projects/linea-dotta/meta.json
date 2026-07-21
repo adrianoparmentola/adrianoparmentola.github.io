@@ -1,0 +1,80 @@
+{
+  "name": "Linea Dotta",
+  "year": "2023",
+  "type": "servizio",
+  "category": "servizi",
+  "status": "include",
+  "featured": true,
+  "methodTags": [
+    "DFSS",
+    "DMADV",
+    "QFD",
+    "Kano",
+    "TRIZ"
+  ],
+  "assets": [
+    {
+      "src": "hero.webp",
+      "kind": "image",
+      "role": "hero",
+      "caption": "Sezione del tunnel — rotaia maglev e vagone sensorizzato"
+    },
+    {
+      "src": "/videos/linea-dotta-loop.mp4",
+      "kind": "video",
+      "role": "thumb"
+    },
+    {
+      "src": "/videos/linea-dotta-model.mp4",
+      "kind": "video",
+      "wide": true,
+      "caption": "Walkthrough del modello 3D"
+    },
+    {
+      "src": "map.webp",
+      "kind": "image",
+      "wide": true,
+      "caption": "La rete sotterranea sui canali storici di Bologna"
+    },
+    {
+      "src": "rivers-map.webp",
+      "kind": "image",
+      "caption": "Studio dei corsi d'acqua storici"
+    },
+    {
+      "src": "sketch-train.webp",
+      "kind": "image",
+      "caption": "Vagone — schizzo di concept"
+    },
+    {
+      "src": "sketch-system.webp",
+      "kind": "image",
+      "caption": "Studi di sistema"
+    },
+    {
+      "src": "cad-train.webp",
+      "kind": "image",
+      "caption": "Vagone — CAD"
+    },
+    {
+      "src": "cad-tunnel.webp",
+      "kind": "image",
+      "caption": "Tunnel — CAD"
+    },
+    {
+      "src": "scheme-maglev.webp",
+      "kind": "image",
+      "caption": "Schema del sistema maglev"
+    },
+    {
+      "src": "render-train.webp",
+      "kind": "image",
+      "caption": "Vagone — render finale"
+    },
+    {
+      "src": "render-tunnel.webp",
+      "kind": "image",
+      "caption": "Il vagone dentro il tunnel"
+    }
+  ]
+}

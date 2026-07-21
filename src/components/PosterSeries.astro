@@ -1,0 +1,93 @@
+---
+// Carosello a crossfade generico per serie di immagini (pensato per le serie
+// di poster Hum.us una volta curate - vedi NOTES.md - ma riusabile per
+// qualunque galleria di progetto).
+import { Image } from 'astro:assets';
+
+interface Props {
+  images: ImageMetadata[];
+  alt: string;
+  intervalMs?: number;
+}
+
+const { images, alt, intervalMs = 3500 } = Astro.props;
+---
+
+<div class="poster-series" data-poster-series data-interval={intervalMs}>
+  {
+    images.map((img, i) => (
+      <Image
+        src={img}
+        alt={`${alt} ${i + 1}`}
+        class:list={['slide', { active: i === 0 }]}
+        widths={[480, 960, 1600]}
+        sizes="(max-width: 768px) 100vw, 50vw"
+      />
+    ))
+  }
+  <div class="dots">
+    {images.map((_, i) => <span class:list={['dot', { active: i === 0 }]} />)}
+  </div>
+</div>
+
+<style>
+  .poster-series {
+    position: relative;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+
+  .slide.active {
+    opacity: 1;
+  }
+
+  .dots {
+    position: absolute;
+    bottom: var(--space-2);
+    left: var(--space-2);
+    display: flex;
+    gap: 0.4rem;
+  }
+
+  .dot {
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, white 60%, transparent);
+  }
+
+  .dot.active {
+    background: var(--color-accent);
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-poster-series]').forEach((root) => {
+    const slides = root.querySelectorAll<HTMLElement>('.slide');
+    const dots = root.querySelectorAll<HTMLElement>('.dot');
+    const interval = Number(root.dataset.interval ?? 3500);
+    if (slides.length < 2) return;
+
+    let current = 0;
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (prefersReducedMotion) return;
+
+    setInterval(() => {
+      slides[current].classList.remove('active');
+      dots[current]?.classList.remove('active');
+      current = (current + 1) % slides.length;
+      slides[current].classList.add('active');
+      dots[current]?.classList.add('active');
+    }, interval);
+  });
+</script>

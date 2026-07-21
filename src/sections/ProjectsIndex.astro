@@ -1,0 +1,263 @@
+---
+// Pagina Progetti: griglia asimmetrica ma armonica (6 colonne), con la
+// dimensione delle finestre pesata su formato e livello grafico dei media
+// (decisa con l'utente): Hum.us e (con)tatto grandi rettangolari,
+// SAFE2WORK e Linea Dotta più piccole; nei Prodotti Cartesio è verticale
+// alta, On the Corner e Vaee quadrate. Gli esercizi tecnici non hanno card:
+// mostrano i render direttamente, in striscia.
+import { Image } from 'astro:assets';
+import ProjectCard from '../components/ProjectCard.astro';
+import { getPublishedProjects, getProjectCopy } from '../lib/content';
+import { getProjectAsset } from '../lib/images';
+import { useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const metas = await getPublishedProjects();
+
+const cards = await Promise.all(
+  metas.map(async (meta) => {
+    const copy = await getProjectCopy(meta.id, lang);
+    return { meta, title: copy?.data.title ?? meta.data.name };
+  })
+);
+
+const bySlug = new Map(cards.map((c) => [c.meta.id, c]));
+
+// Disposizione esplicita per gruppo: [slug, colonne (su 6), aspect, tall?]
+type Cell = { slug: string; span: number; aspect: 'landscape' | 'standard' | 'portrait' | 'square'; tall?: boolean };
+
+const LAYOUT: { key: 'servizi' | 'prodotti' | 'spazi'; cells: Cell[] }[] = [
+  {
+    key: 'servizi',
+    cells: [
+      { slug: 'humus', span: 4, aspect: 'landscape' },
+      { slug: 'linea-dotta', span: 2, aspect: 'standard' },
+      { slug: 'safe-to-work', span: 2, aspect: 'standard' },
+      { slug: 'contatto', span: 4, aspect: 'landscape' },
+    ],
+  },
+  {
+    key: 'prodotti',
+    cells: [
+      { slug: 'autonomia', span: 4, aspect: 'landscape' },
+      { slug: 'cartesio', span: 2, aspect: 'portrait', tall: true },
+      { slug: 'on-the-corner', span: 2, aspect: 'square' },
+      { slug: 'vaee', span: 2, aspect: 'square' },
+    ],
+  },
+  {
+    key: 'spazi',
+    cells: [
+      { slug: 'talea', span: 4, aspect: 'landscape' },
+      { slug: 'valverde', span: 2, aspect: 'standard' },
+      { slug: 'visione-dai-fondi', span: 3, aspect: 'landscape' },
+    ],
+  },
+];
+
+// Esercizi tecnici: render mostrati direttamente (niente card-finestra)
+const demos = cards.filter((c) => c.meta.data.status === 'demo');
+const demoStrips = demos.map(({ meta, title }) => ({
+  slug: meta.id,
+  title,
+  tags: meta.data.methodTags,
+  images: meta.data.assets
+    .filter((a) => a.kind === 'image' && !a.wide) // solo i render, non le slide
+    .map((a) => ({ img: getProjectAsset(meta.id, a.src), caption: a.caption }))
+    .filter((x) => x.img),
+}));
+
+// slugs con layout esplicito - eventuali progetti nuovi finiscono in coda al gruppo
+const placed = new Set(LAYOUT.flatMap((g) => g.cells.map((c) => c.slug)));
+---
+
+<div class="projects-index">
+  {
+    LAYOUT.map((group) => (
+      <section id={group.key} class="group">
+        <h2 class="reveal">{t(`cat.${group.key}`)}</h2>
+        <div class="grid">
+          {group.cells.map((cell, i) => {
+            const card = bySlug.get(cell.slug);
+            if (!card) return null;
+            return (
+              <div
+                class:list={['cell', 'reveal', { tall: cell.tall }]}
+                style={`--span: ${cell.span}; --delay: ${(i % 4) * 90}ms`}
+              >
+                <ProjectCard meta={card.meta} title={card.title} lang={lang} aspect={cell.aspect} />
+              </div>
+            );
+          })}
+          {cards
+            .filter((c) => c.meta.data.category === group.key && !placed.has(c.meta.id))
+            .map((c) => (
+              <div class="cell reveal" style="--span: 2">
+                <ProjectCard meta={c.meta} title={c.title} lang={lang} />
+              </div>
+            ))}
+        </div>
+      </section>
+    ))
+  }
+
+  {
+    demoStrips.length > 0 && (
+      <section id="demo" class="group">
+        <h2 class="reveal">{t('cat.demo')}</h2>
+        {demoStrips.map((demo) => (
+          <div class="demo-strip reveal">
+            <div class="demo-head">
+              <h3>
+                <a href={`/${lang}/projects/${demo.slug}/`}>{demo.title} →</a>
+              </h3>
+              <div class="tags">
+                {demo.tags.map((tag) => (
+                  <span class="meta-tag tag">{tag}</span>
+                ))}
+              </div>
+            </div>
+            <div class="demo-renders">
+              {demo.images.map(({ img, caption }) => (
+                <figure>
+                  <Image src={img!} alt={caption ?? demo.title} widths={[400, 700]} sizes="(max-width: 768px) 50vw, 25vw" />
+                  {caption && <figcaption class="meta-tag">{caption}</figcaption>}
+                </figure>
+              ))}
+            </div>
+          </div>
+        ))}
+      </section>
+    )
+  }
+</div>
+
+<style>
+  .projects-index {
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: var(--space-4);
+  }
+
+  .group {
+    padding-top: var(--space-6);
+    scroll-margin-top: var(--space-6);
+  }
+
+  .group h2 {
+    font-size: var(--text-h1);
+    letter-spacing: -0.01em;
+    border-bottom: 1px solid var(--color-text);
+    padding-bottom: var(--space-2);
+    margin-bottom: var(--space-3);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    grid-auto-flow: dense;
+    gap: var(--space-4) var(--space-3);
+    align-items: start;
+  }
+
+  .cell {
+    grid-column: span var(--span, 2);
+  }
+
+  /* Finestra verticale alta (Cartesio): occupa due righe e il media riempie
+     tutta l'altezza disponibile invece del solo aspect-ratio. */
+  .cell.tall {
+    grid-row: span 2;
+    height: 100%;
+  }
+
+  .cell.tall :global(.project-card) {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .cell.tall :global(.thumb) {
+    aspect-ratio: auto;
+    flex: 1;
+    min-height: 0;
+  }
+
+  /* Esercizi tecnici: striscia di render, nessuna finestra-card */
+  .demo-strip {
+    margin-bottom: var(--space-4);
+  }
+
+  .demo-head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+    margin-bottom: var(--space-2);
+  }
+
+  .demo-head h3 {
+    font-size: var(--text-h3);
+  }
+
+  .demo-head a:hover {
+    color: var(--color-accent);
+  }
+
+  .tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .tags .tag {
+    color: var(--color-text-muted);
+  }
+
+  .demo-renders {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-3);
+  }
+
+  .demo-renders figure {
+    margin: 0;
+  }
+
+  .demo-renders :global(img) {
+    width: 100%;
+    height: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+  }
+
+  .demo-renders figcaption {
+    margin-top: var(--space-1);
+  }
+
+  @media (max-width: 768px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+
+    .cell,
+    .cell.tall {
+      grid-column: auto;
+      grid-row: auto;
+      height: auto;
+    }
+
+    .cell.tall :global(.thumb) {
+      aspect-ratio: 3 / 4;
+    }
+
+    .demo-renders {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>

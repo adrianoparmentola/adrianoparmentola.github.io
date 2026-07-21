@@ -1,0 +1,79 @@
+---
+import { useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  src: string; // path assoluto in /public, es. "/models/on-the-corner/lamp.glb"
+  downloadSrc?: string; // es. "/models/on-the-corner/lamp.stl"
+  alt: string;
+  lang: Lang;
+  // hero: niente hint testuale, zoom disabilitato (non deve rubare lo scroll
+  // della pagina), proporzioni piu' compatte. default: viewer di dettaglio.
+  variant?: 'default' | 'hero';
+}
+
+const { src, downloadSrc, alt, lang, variant = 'default' } = Astro.props;
+const t = useTranslations(lang);
+---
+
+<script>
+  import '@google/model-viewer';
+</script>
+
+<div class:list={['model-wrap', variant]}>
+  <model-viewer
+    src={src}
+    alt={alt}
+    camera-controls
+    auto-rotate
+    auto-rotate-delay="1200"
+    rotation-per-second="18deg"
+    shadow-intensity="1"
+    exposure="1"
+    interaction-prompt="none"
+    disable-zoom={variant === 'hero'}
+  >
+  </model-viewer>
+  {variant === 'default' && <p class="hint meta-tag">{t('model.hint')}</p>}
+  {
+    variant === 'default' && downloadSrc && (
+      <a class="download meta-tag" href={downloadSrc} download>
+        {t('model.download')}
+      </a>
+    )
+  }
+</div>
+
+<style>
+  .model-wrap {
+    position: relative;
+    background: var(--color-bg);
+  }
+
+  model-viewer {
+    width: 100%;
+    /* height:auto serve a battere l'altezza host di default (150px) di
+       model-viewer, altrimenti aspect-ratio viene ignorata */
+    height: auto;
+    aspect-ratio: 4 / 3;
+    --poster-color: transparent;
+  }
+
+  .hero model-viewer {
+    aspect-ratio: 1 / 1;
+  }
+
+  .hint {
+    margin-top: var(--space-1);
+  }
+
+  .download {
+    display: inline-block;
+    margin-top: var(--space-1);
+    border-bottom: 1px solid currentColor;
+  }
+
+  .download:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+</style>

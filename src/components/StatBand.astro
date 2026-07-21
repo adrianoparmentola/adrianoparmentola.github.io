@@ -1,0 +1,123 @@
+---
+// Banda di numeri reali (dal caso studio Hum.us, tesi verificata).
+// I valori animano con un count-up quando entrano nel viewport.
+interface Stat {
+  from?: string; // valore di partenza mostrato prima della freccia (es. "48")
+  to: string; // valore finale (es. "55") - solo la parte numerica anima
+  suffix?: string; // es. "%" o "min"
+  label: string;
+}
+
+interface Props {
+  source: string;
+  stats: Stat[];
+}
+
+const { source, stats } = Astro.props;
+---
+
+<section class="stat-band reveal">
+  <p class="meta-tag source">{source}</p>
+  <div class="tiles">
+    {
+      stats.map((s) => (
+        <div class="tile">
+          <p class="value">
+            {s.from && <span class="from">{s.from} → </span>}
+            <span class="count" data-target={s.to}>
+              {s.to}
+            </span>
+            {s.suffix && <span class="suffix">{s.suffix}</span>}
+          </p>
+          <p class="label">{s.label}</p>
+        </div>
+      ))
+    }
+  </div>
+</section>
+
+<script>
+  // Count-up leggero: anima solo il numero finale, rispetta reduced-motion.
+  function initCountUp() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const els = document.querySelectorAll<HTMLElement>('.count:not([data-done])');
+    if (!els.length) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          const el = entry.target as HTMLElement;
+          io.unobserve(el);
+          el.dataset.done = '1';
+          const raw = el.dataset.target ?? '';
+          const target = parseFloat(raw.replace(',', '.'));
+          if (Number.isNaN(target)) continue;
+          const decimals = raw.includes(',') || raw.includes('.') ? 1 : 0;
+          const dur = 900;
+          const t0 = performance.now();
+          const tick = (now: number) => {
+            const p = Math.min((now - t0) / dur, 1);
+            const eased = 1 - Math.pow(1 - p, 3);
+            const v = (target * eased).toFixed(decimals);
+            el.textContent = decimals ? v.replace('.', ',') : v;
+            if (p < 1) requestAnimationFrame(tick);
+            else el.textContent = raw;
+          };
+          requestAnimationFrame(tick);
+        }
+      },
+      { threshold: 0.4 }
+    );
+    els.forEach((el) => io.observe(el));
+  }
+  initCountUp();
+  document.addEventListener('astro:page-load', initCountUp);
+</script>
+
+<style>
+  .stat-band {
+    border-block: 1px solid var(--color-text);
+    padding: var(--space-4);
+  }
+
+  .source {
+    margin-bottom: var(--space-3);
+  }
+
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--space-3);
+  }
+
+  .value {
+    font-size: var(--text-h2);
+    font-weight: var(--weight-bold);
+    line-height: 1;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+  }
+
+  .from {
+    color: var(--color-text-muted);
+    font-weight: var(--weight-light);
+  }
+
+  .suffix {
+    font-size: var(--text-h3);
+  }
+
+  .label {
+    margin-top: var(--space-1);
+    font-size: var(--text-meta);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-muted);
+  }
+
+  @media (max-width: 900px) {
+    .tiles {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+</style>

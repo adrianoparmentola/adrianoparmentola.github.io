@@ -1,0 +1,108 @@
+---
+// Sezione di storytelling della home: dichiarazione grande + un artefatto
+// reale di progetto che la dimostra (rapporto testo/immagine alla
+// houseplant.com: frase secca, immagine dominante, link al progetto).
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+
+interface Props {
+  statement: string;
+  linkLabel: string;
+  href: string;
+  image?: ImageMetadata;
+  videoSrc?: string;
+  flip?: boolean; // artefatto a sinistra invece che a destra
+}
+
+const { statement, linkLabel, href, image, videoSrc, flip = false } = Astro.props;
+---
+
+<section class:list={['story', { flip }]}>
+  <div class="text reveal">
+    <h2>{statement}</h2>
+    <a class="meta-tag link" href={href}>{linkLabel} →</a>
+  </div>
+  <a class="artifact reveal" href={href} style="--delay: 120ms">
+    {image && <Image src={image} alt={linkLabel} widths={[640, 1100]} sizes="(max-width: 900px) 100vw, 55vw" />}
+    {videoSrc && <video src={videoSrc} autoplay muted loop playsinline></video>}
+  </a>
+</section>
+
+<style>
+  .story {
+    display: grid;
+    grid-template-columns: 5fr 7fr;
+    gap: var(--space-4);
+    align-items: center;
+    padding: var(--space-8) var(--space-4);
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+  }
+
+  .story.flip .text {
+    order: 2;
+  }
+
+  .story.flip .artifact {
+    order: 1;
+  }
+
+  h2 {
+    font-size: var(--text-display-small, var(--text-h1));
+    font-weight: var(--weight-bold);
+    line-height: 1.05;
+    letter-spacing: -0.01em;
+    max-width: 16ch;
+  }
+
+  .link {
+    display: inline-block;
+    margin-top: var(--space-3);
+    border-bottom: 1px solid currentColor;
+  }
+
+  .link:hover {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+
+  .artifact :global(img),
+  .artifact video {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .artifact {
+    overflow: hidden;
+  }
+
+  .artifact :global(img) {
+    transition: transform 0.6s cubic-bezier(0.2, 0.6, 0.2, 1);
+  }
+
+  .artifact:hover :global(img) {
+    transform: scale(1.025);
+  }
+
+  @media (max-width: 900px) {
+    .story {
+      grid-template-columns: 1fr;
+      padding: var(--space-6) var(--space-4);
+    }
+
+    .story.flip .text {
+      order: 1;
+    }
+
+    .story.flip .artifact {
+      order: 2;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .artifact :global(img) {
+      transition: none;
+    }
+  }
+</style>

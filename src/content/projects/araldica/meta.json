@@ -1,0 +1,14 @@
+{
+  "name": "Araldica",
+  "year": "2021",
+  "type": "prodotto",
+  "category": "prodotti",
+  "status": "pending",
+  "featured": false,
+  "methodTags": [
+    "VisualCom",
+    "PhysicalAd",
+    "Installation"
+  ],
+  "assets": []
+}

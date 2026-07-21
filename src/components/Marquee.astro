@@ -1,0 +1,72 @@
+---
+// Nastro scorrevole delle sigle metodologiche - marchi di garanzia, mai
+// spiegati (regola del brief). Contenuto duplicato per il loop CSS seamless.
+interface Props {
+  items: string[];
+}
+
+const { items } = Astro.props;
+---
+
+<div class="marquee" aria-hidden="true">
+  <div class="track">
+    {[0, 1].map(() => (
+      <span class="run">
+        {items.map((item) => (
+          <span class="item">{item}</span>
+        ))}
+      </span>
+    ))}
+  </div>
+</div>
+
+<style>
+  .marquee {
+    overflow: hidden;
+    border-block: 1px solid var(--color-text);
+    padding: var(--space-2) 0;
+    white-space: nowrap;
+  }
+
+  .track {
+    display: inline-flex;
+    animation: marquee 36s linear infinite;
+  }
+
+  .run {
+    display: inline-flex;
+  }
+
+  .item {
+    font-size: var(--text-h2);
+    font-weight: var(--weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding-right: var(--space-6);
+  }
+
+  .item::after {
+    content: '·';
+    color: var(--color-accent);
+    padding-left: var(--space-6);
+  }
+
+  .marquee:hover .track {
+    animation-play-state: paused;
+  }
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .track {
+      animation: none;
+    }
+  }
+</style>

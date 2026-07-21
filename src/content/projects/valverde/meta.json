@@ -1,0 +1,29 @@
+{
+  "name": "Murale — Residenza Valverde",
+  "year": "2023",
+  "type": "installazione",
+  "status": "include",
+  "featured": false,
+  "methodTags": [],
+  "assets": [
+    {
+      "src": "/videos/valverde-mural.mp4",
+      "kind": "video",
+      "role": "hero",
+      "wide": true,
+      "caption": "Il progetto del murale — video"
+    },
+    {
+      "src": "mural-01.webp",
+      "kind": "image",
+      "role": "thumb",
+      "caption": "La presentazione del murale all'inaugurazione"
+    },
+    {
+      "src": "mural-02.webp",
+      "kind": "image",
+      "caption": "Il murale dedicato a Don Tonino Bello"
+    }
+  ],
+  "category": "spazi"
+}

@@ -1,0 +1,107 @@
+---
+import { Image } from 'astro:assets';
+
+interface Season {
+  key: string;
+  label: string;
+  image: ImageMetadata;
+}
+
+interface Props {
+  seasons: Season[];
+}
+
+const { seasons } = Astro.props;
+---
+
+<div class="seasonal-toggle" data-seasonal-toggle>
+  <div class="frame">
+    {
+      seasons.map((season, i) => (
+        <Image
+          src={season.image}
+          alt={season.label}
+          data-season={season.key}
+          class:list={['season-image', { active: i === 0 }]}
+          widths={[480, 960, 1600]}
+          sizes="(max-width: 768px) 100vw, 60vw"
+        />
+      ))
+    }
+  </div>
+  <div class="buttons" role="tablist">
+    {
+      seasons.map((season, i) => (
+        <button
+          type="button"
+          data-season-btn={season.key}
+          class:list={{ active: i === 0 }}
+          role="tab"
+        >
+          {season.label}
+        </button>
+      ))
+    }
+  </div>
+</div>
+
+<style>
+  .frame {
+    position: relative;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+  }
+
+  .season-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+
+  .season-image.active {
+    opacity: 1;
+  }
+
+  .buttons {
+    display: flex;
+    gap: var(--space-2);
+    margin-top: var(--space-2);
+    flex-wrap: wrap;
+  }
+
+  .buttons button {
+    font-family: var(--font-family);
+    font-weight: var(--weight-bold);
+    font-size: var(--text-meta);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    background: none;
+    border: none;
+    padding: 0;
+    cursor: pointer;
+    color: var(--color-text-muted);
+  }
+
+  .buttons button.active {
+    color: var(--color-accent);
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-seasonal-toggle]').forEach((root) => {
+    const buttons = root.querySelectorAll<HTMLButtonElement>('[data-season-btn]');
+    const images = root.querySelectorAll<HTMLElement>('[data-season]');
+
+    buttons.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const key = btn.dataset.seasonBtn;
+        buttons.forEach((b) => b.classList.toggle('active', b === btn));
+        images.forEach((img) => img.classList.toggle('active', img.dataset.season === key));
+      });
+    });
+  });
+</script>

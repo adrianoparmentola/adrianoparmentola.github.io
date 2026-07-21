@@ -1,0 +1,51 @@
+---
+import TestimonialCard from '../components/TestimonialCard.astro';
+import { getCollection } from 'astro:content';
+import { useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const testimonials = await getCollection('testimonials');
+---
+
+<section class="cases">
+  <h1>{t('testimonials.title')}</h1>
+  <div class="grid">
+    {testimonials.map((tst) => <TestimonialCard testimonial={tst} />)}
+  </div>
+</section>
+
+<style>
+  .cases {
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: var(--space-8) var(--space-4);
+  }
+
+  h1 {
+    font-size: var(--text-h1);
+    margin-bottom: var(--space-4);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-3);
+  }
+
+  @media (max-width: 900px) {
+    .grid {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

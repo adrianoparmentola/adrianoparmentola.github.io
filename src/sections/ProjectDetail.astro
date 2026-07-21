@@ -1,0 +1,243 @@
+---
+import { Image } from 'astro:assets';
+import { render, type CollectionEntry } from 'astro:content';
+import { getProjectAsset } from '../lib/images';
+import { useTranslations, type Lang } from '../i18n/ui';
+import ModelViewer from '../components/ModelViewer.astro';
+import SeasonalToggle from '../components/SeasonalToggle.astro';
+
+interface Props {
+  meta: CollectionEntry<'projectMeta'>;
+  copy: CollectionEntry<'projects'>;
+  lang: Lang;
+}
+
+const { meta, copy, lang } = Astro.props;
+const t = useTranslations(lang);
+const slug = meta.id;
+const { Content } = await render(copy);
+
+const modelAsset = meta.data.assets.find((a) => a.kind === 'model');
+const heroImageAsset = meta.data.assets.find((a) => a.kind === 'image' && a.role === 'hero');
+const heroImage = heroImageAsset ? getProjectAsset(slug, heroImageAsset.src) : undefined;
+// Sorgenti piccole (es. le foto Valverde, max ~600px): niente full-bleed che
+// le sgrana - le mostriamo a dimensione naturale, centrate.
+const heroIsSmall = heroImage ? heroImage.width < 1000 : false;
+
+const SEASON_LABELS: Record<string, string> = {
+  'season-autumn.webp': 'Autunno',
+  'season-winter.webp': 'Inverno',
+  'season-spring.webp': 'Primavera',
+  'season-summer.webp': 'Estate',
+  'season-entrance.webp': 'Ingresso',
+};
+
+const isSeasonAsset = (src: string) => slug === 'visione-dai-fondi' && src.startsWith('season-');
+
+const seasons =
+  slug === 'visione-dai-fondi'
+    ? meta.data.assets
+        .filter((a) => a.kind === 'image' && a.src.startsWith('season-'))
+        .map((a) => ({
+          key: a.src,
+          label: SEASON_LABELS[a.src] ?? a.src,
+          image: getProjectAsset(slug, a.src)!,
+        }))
+        .filter((s) => s.image)
+    : [];
+
+// Flusso media: tutto tranne hero (mostrato grande sopra), modello 3D
+// (viewer dedicato) e stagioni (toggle dedicato).
+const flowAssets = meta.data.assets.filter(
+  (a) => a.kind !== 'model' && a.src !== heroImageAsset?.src && !isSeasonAsset(a.src)
+);
+---
+
+<article class="project-detail">
+  <header>
+    <p class="meta-tag">
+      {meta.data.type}
+      {meta.data.year && ` · ${meta.data.year}`}
+      {meta.data.status === 'demo' && ` · ${t('projects.demoLabel')}`}
+    </p>
+    <h1>{copy.data.title}</h1>
+    {copy.data.dek && <p class="dek">{copy.data.dek}</p>}
+    {meta.data.methodTags.length > 0 && (
+      <div class="tags">
+        {meta.data.methodTags.map((tag) => <span class="meta-tag tag">{tag}</span>)}
+      </div>
+    )}
+  </header>
+
+  {
+    modelAsset && (
+      <ModelViewer
+        src={modelAsset.src}
+        downloadSrc={slug === 'on-the-corner' ? '/models/on-the-corner/lamp.stl' : undefined}
+        alt={copy.data.title}
+        lang={lang}
+      />
+    )
+  }
+
+  {
+    heroImage && (
+      <figure class:list={['hero-figure', { 'hero-small': heroIsSmall }]}>
+        <Image
+          class="hero-image"
+          src={heroImage}
+          alt={heroImageAsset?.caption ?? copy.data.title}
+          widths={heroIsSmall ? [heroImage.width] : [640, 1200, 2000]}
+          sizes={heroIsSmall ? `${heroImage.width}px` : '100vw'}
+          priority
+        />
+        {heroImageAsset?.caption && <figcaption class="meta-tag">{heroImageAsset.caption}</figcaption>}
+      </figure>
+    )
+  }
+
+  <div class="prose">
+    <Content />
+  </div>
+
+  {seasons.length > 0 && <SeasonalToggle seasons={seasons} />}
+
+  {
+    flowAssets.length > 0 && (
+      <div class="media-flow">
+        {flowAssets.map((a) => {
+          if (a.kind === 'video') {
+            return (
+              <figure class:list={['media-item', { wide: a.wide }]}>
+                <video src={a.src} controls muted loop playsinline preload="metadata" />
+                {a.caption && <figcaption class="meta-tag">{a.caption}</figcaption>}
+              </figure>
+            );
+          }
+          const img = getProjectAsset(slug, a.src);
+          if (!img) return null;
+          return (
+            <figure class:list={['media-item', { wide: a.wide }]}>
+              <Image
+                src={img}
+                alt={a.caption ?? copy.data.title}
+                widths={[480, 960, 1600]}
+                sizes={a.wide ? '100vw' : '(max-width: 768px) 100vw, 50vw'}
+              />
+              {a.caption && <figcaption class="meta-tag">{a.caption}</figcaption>}
+            </figure>
+          );
+        })}
+      </div>
+    )
+  }
+</article>
+
+<style>
+  .project-detail {
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: var(--space-4);
+  }
+
+  header {
+    max-width: 48rem;
+    margin-bottom: var(--space-4);
+  }
+
+  h1 {
+    font-size: var(--text-h1);
+    margin: var(--space-1) 0;
+  }
+
+  .dek {
+    font-size: var(--text-h3);
+    font-weight: var(--weight-light);
+    color: var(--color-text-muted);
+  }
+
+  .tags {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: var(--space-2);
+  }
+
+  .tags .tag {
+    color: var(--color-text-muted);
+  }
+
+  .hero-figure {
+    margin: var(--space-4) 0;
+  }
+
+  .hero-image {
+    width: 100%;
+    max-height: 42rem;
+    object-fit: cover;
+  }
+
+  /* Sorgenti piccole: dimensione naturale, centrate, mai upscalate */
+  .hero-small {
+    text-align: center;
+  }
+
+  .hero-small .hero-image {
+    width: auto;
+    max-width: 100%;
+    margin-inline: auto;
+    object-fit: contain;
+  }
+
+  .prose {
+    max-width: 42rem;
+    margin: var(--space-6) 0;
+    line-height: 1.6;
+  }
+
+  .prose :global(h2) {
+    font-size: var(--text-h3);
+    margin-top: var(--space-4);
+  }
+
+  .media-flow {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-6) var(--space-3);
+    margin-top: var(--space-6);
+  }
+
+  .media-item {
+    margin: 0;
+  }
+
+  .media-item.wide {
+    grid-column: 1 / -1;
+  }
+
+  /* max-width invece di width: le immagini più piccole della colonna
+     (es. foto Valverde) restano a dimensione naturale, centrate, invece
+     di venire upscalate e sgranarsi. */
+  .media-item :global(img) {
+    max-width: 100%;
+    width: auto;
+    height: auto;
+    margin-inline: auto;
+    display: block;
+  }
+
+  .media-item video {
+    width: 100%;
+    height: auto;
+  }
+
+  figcaption {
+    margin-top: var(--space-1);
+  }
+
+  @media (max-width: 768px) {
+    .media-flow {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

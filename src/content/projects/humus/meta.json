@@ -1,0 +1,136 @@
+{
+  "name": "Hum.us",
+  "year": "2024",
+  "type": "servizio",
+  "category": "servizi",
+  "status": "include",
+  "featured": true,
+  "methodTags": [
+    "Six Sigma",
+    "DMAIC",
+    "QFD",
+    "Kano",
+    "TRIZ"
+  ],
+  "assets": [
+    {
+      "src": "boxes-showcase.webp",
+      "kind": "image",
+      "role": "hero",
+      "caption": "Le meal box in esposizione"
+    },
+    {
+      "src": "/videos/humus-catering-bar.mp4",
+      "kind": "video",
+      "wide": true,
+      "caption": "Catering — servizio bar"
+    },
+    {
+      "src": "box-top.webp",
+      "kind": "image",
+      "caption": "Meal box — vista dall'alto"
+    },
+    {
+      "src": "box-top-2.webp",
+      "kind": "image",
+      "caption": "Meal box — variante"
+    },
+    {
+      "src": "bags-and-boxes.webp",
+      "kind": "image",
+      "caption": "Bag e box"
+    },
+    {
+      "src": "bag.webp",
+      "kind": "image",
+      "caption": "La bag di carta"
+    },
+    {
+      "src": "box-side.webp",
+      "kind": "image",
+      "wide": true,
+      "caption": "Meal box — layout laterale"
+    },
+    {
+      "src": "/videos/humus-catering.mp4",
+      "kind": "video",
+      "caption": "Catering — servizio al tavolo"
+    },
+    {
+      "src": "all-plates.webp",
+      "kind": "image",
+      "wide": true,
+      "caption": "La collezione di piatti"
+    },
+    {
+      "src": "plate-yellow.webp",
+      "kind": "image",
+      "caption": "Piatto — giallo"
+    },
+    {
+      "src": "plate-red.webp",
+      "kind": "image",
+      "caption": "Piatto — rosso"
+    },
+    {
+      "src": "plate-green.webp",
+      "kind": "image",
+      "caption": "Piatto — verde"
+    },
+    {
+      "src": "poster-aperitivo.webp",
+      "kind": "image",
+      "caption": "Poster A3 — aperitivo"
+    },
+    {
+      "src": "poster-a4-01.webp",
+      "kind": "image",
+      "caption": "Poster A4"
+    },
+    {
+      "src": "poster-a4-02.webp",
+      "kind": "image",
+      "caption": "Poster A4"
+    },
+    {
+      "src": "poster-bar.webp",
+      "kind": "image",
+      "caption": "Poster bar"
+    },
+    {
+      "src": "poster-mockup.webp",
+      "kind": "image",
+      "caption": "Mockup segnaletica"
+    },
+    {
+      "src": "poster-explained.webp",
+      "kind": "image",
+      "caption": "Segnaletica — spiegazione del design"
+    },
+    {
+      "src": "canteen-tags.webp",
+      "kind": "image",
+      "caption": "Targhette mensa"
+    },
+    {
+      "src": "voucher-mockup.webp",
+      "kind": "image",
+      "caption": "Mockup libretto voucher"
+    },
+    {
+      "src": "voucher-front.webp",
+      "kind": "image",
+      "caption": "Voucher — fronte"
+    },
+    {
+      "src": "voucher-back.webp",
+      "kind": "image",
+      "caption": "Voucher — retro"
+    },
+    {
+      "src": "catering-story.webp",
+      "kind": "image",
+      "caption": "Catering Camplus — story social"
+    }
+  ]
+}

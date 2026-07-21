@@ -1,0 +1,31 @@
+{
+  "name": "On the Corner",
+  "type": "prodotto",
+  "status": "include",
+  "featured": true,
+  "methodTags": [],
+  "assets": [
+    {
+      "src": "/models/on-the-corner/lamp.glb",
+      "kind": "model",
+      "role": "hero"
+    },
+    {
+      "src": "hero-marble.webp",
+      "kind": "image",
+      "role": "gallery"
+    },
+    {
+      "src": "concept-plywood.webp",
+      "kind": "image",
+      "role": "thumb"
+    },
+    {
+      "src": "detail.webp",
+      "kind": "image",
+      "role": "gallery"
+    }
+  ],
+  "year": "2022",
+  "category": "prodotti"
+}

@@ -1,0 +1,66 @@
+---
+import { ClientRouter } from 'astro:transitions';
+import '../styles/tokens.css';
+import Nav from '../components/Nav.astro';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+  title: string;
+}
+
+const { lang, title } = Astro.props;
+---
+
+<!doctype html>
+<html lang={lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title} — Adriano Parmentola</title>
+    <meta
+      name="description"
+      content="Adriano Parmentola — service design portfolio and hospitality consulting."
+    />
+    <ClientRouter />
+    <noscript>
+      <style>
+        .reveal {
+          opacity: 1 !important;
+          transform: none !important;
+        }
+      </style>
+    </noscript>
+  </head>
+  <body>
+    <Nav lang={lang} />
+    <main>
+      <slot />
+    </main>
+
+    <script>
+      // Reveal a scroll: gli elementi .reveal entrano con fade+translate
+      // quando toccano il viewport. Ri-inizializzato dopo ogni view
+      // transition (astro:page-load). Con reduced-motion il CSS disattiva
+      // tutto, quindi qui aggiungiamo solo la classe.
+      function initReveal() {
+        const els = document.querySelectorAll('.reveal:not(.in)');
+        if (!els.length) return;
+        const io = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('in');
+                io.unobserve(entry.target);
+              }
+            }
+          },
+          { threshold: 0.12, rootMargin: '0px 0px -5% 0px' }
+        );
+        els.forEach((el) => io.observe(el));
+      }
+      initReveal();
+      document.addEventListener('astro:page-load', initReveal);
+    </script>
+  </body>
+</html>
