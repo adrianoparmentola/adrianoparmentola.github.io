@@ -1,13 +1,15 @@
 ---
-// Home ristrutturata su reference houseplant.com: hero video full-bleed con
-// il claim di TALEA, tre colonne-categoria piene, marquee tecnologie,
-// referenze + background (menù 3D, CV, lingue, Gallup, speed tasks), CTA.
+// Home a storytelling verticale: dopo gli user test l'obiettivo è invitare
+// esplicitamente ad approfondire (pulsanti visibili + narrazione a capitoli).
+// Flusso: hero (ruolo leggibile) → 3 capitoli-categoria con descrizione e
+// pulsante → caso studio in evidenza → marquee → referenze & background → CTA.
 import { Image } from 'astro:assets';
 import TestimonialCard from '../components/TestimonialCard.astro';
 import ModelViewer from '../components/ModelViewer.astro';
 import Marquee from '../components/Marquee.astro';
 import { getCollection } from 'astro:content';
 import { getProjectAsset } from '../lib/images';
+import { getProjectCopy } from '../lib/content';
 import { profile } from '../lib/profile';
 import { useTranslations, type Lang } from '../i18n/ui';
 
@@ -20,12 +22,16 @@ const t = useTranslations(lang);
 
 const testimonials = await getCollection('testimonials');
 
-// Immagini delle colonne-categoria (scelte con l'utente)
+// Capitoli-categoria: immagine, descrizione, pulsante -> ancora in Progetti
 const CATEGORIES = [
   { key: 'servizi', image: getProjectAsset('safe-to-work', 'hero.webp') },
   { key: 'prodotti', image: getProjectAsset('cartesio', 'hero.webp') },
   { key: 'spazi', image: getProjectAsset('talea', 'hero.webp') },
 ] as const;
+
+// Caso studio in evidenza: Hum.us
+const featuredImage = getProjectAsset('humus', 'boxes-showcase.webp');
+const featuredCopy = await getProjectCopy('humus', lang);
 
 const MARQUEE_ITEMS = ['Six Sigma', 'DMAIC', 'QFD', 'Kano', 'TRIZ', 'Service Design', 'VRED', 'Blender'];
 ---
@@ -33,32 +39,53 @@ const MARQUEE_ITEMS = ['Six Sigma', 'DMAIC', 'QFD', 'Kano', 'TRIZ', 'Service Des
 <section class="hero">
   <video src="/videos/hero-talea.mp4" autoplay muted loop playsinline aria-hidden="true"></video>
   <div class="overlay">
-    <h1 class="claim reveal">{t('home.claim')}</h1>
-    <p class="role reveal" style="--delay: 120ms">{t('home.role')}</p>
-    <div class="cta-row reveal" style="--delay: 240ms">
-      <a class="cta" href={`/${lang}/method/`}>{t('home.cta.method')} →</a>
+    <p class="eyebrow reveal">{t('home.eyebrow')}</p>
+    <h1 class="role reveal" style="--delay: 100ms">{t('home.role')}</h1>
+    <div class="cta-row reveal" style="--delay: 220ms">
+      <a class="cta primary" href={`/${lang}/projects/`}>{t('home.cta.projects')} →</a>
       <a class="cta ghost" href={`/${lang}/contact/`}>{t('home.cta.contact')}</a>
     </div>
+    <span class="scroll-hint reveal" style="--delay: 340ms">{t('home.scroll')} ↓</span>
   </div>
 </section>
 
-<section class="categories">
-  {
-    CATEGORIES.map((cat, i) => (
-      <a class="category reveal" style={`--delay: ${i * 100}ms`} href={`/${lang}/projects/#${cat.key}`}>
-        {cat.image && (
-          <Image
-            src={cat.image}
-            alt={t(`cat.${cat.key}`)}
-            widths={[480, 800, 1200]}
-            sizes="(max-width: 900px) 100vw, 33vw"
-          />
-        )}
-        <span class="num meta-tag">0{i + 1}</span>
-        <span class="label">{t(`cat.${cat.key}`)}</span>
-      </a>
-    ))
-  }
+<section class="chapters">
+  <h2 class="chapters-title reveal">{t('home.chapters')}</h2>
+  <div class="chapter-list">
+    {
+      CATEGORIES.map((cat, i) => (
+        <a class="chapter reveal" style={`--delay: ${i * 90}ms`} href={`/${lang}/projects/#${cat.key}`}>
+          <div class="chapter-media">
+            {cat.image && (
+              <Image src={cat.image} alt={t(`cat.${cat.key}`)} widths={[480, 800, 1200]} sizes="(max-width: 900px) 100vw, 33vw" />
+            )}
+            <span class="num meta-tag">0{i + 1}</span>
+          </div>
+          <div class="chapter-body">
+            <h3>{t(`cat.${cat.key}`)}</h3>
+            <p>{t(`cat.${cat.key}.desc`)}</p>
+            <span class="pill">{t('home.cta.explore')} →</span>
+          </div>
+        </a>
+      ))
+    }
+  </div>
+</section>
+
+<section class="featured reveal">
+  <a class="featured-inner" href={`/${lang}/projects/humus/`}>
+    <div class="featured-media">
+      {featuredImage && (
+        <Image src={featuredImage} alt="Hum.us" widths={[640, 1200, 1800]} sizes="(max-width: 900px) 100vw, 60vw" />
+      )}
+    </div>
+    <div class="featured-text">
+      <p class="eyebrow">{t('featured.eyebrow')}</p>
+      <h2>{featuredCopy?.data.title ?? 'Hum.us'}</h2>
+      <p class="lead">{t('featured.line')}</p>
+      <span class="cta primary">{t('featured.cta')} →</span>
+    </div>
+  </a>
 </section>
 
 <Marquee items={MARQUEE_ITEMS} />
@@ -114,14 +141,14 @@ const MARQUEE_ITEMS = ['Six Sigma', 'DMAIC', 'QFD', 'Kano', 'TRIZ', 'Service Des
 
 <section class="contact-band reveal">
   <h2>{t('home.cta.contact')}</h2>
-  <a class="cta" href={`/${lang}/contact/`}>{t('nav.contact')} →</a>
+  <a class="cta primary" href={`/${lang}/contact/`}>{t('nav.contact')} →</a>
 </section>
 
 <style>
-  /* Hero video full-bleed con claim sovrapposto */
+  /* ---------- Hero ---------- */
   .hero {
     position: relative;
-    min-height: 82vh;
+    min-height: 84vh;
     overflow: hidden;
     display: flex;
     align-items: flex-end;
@@ -139,109 +166,236 @@ const MARQUEE_ITEMS = ['Six Sigma', 'DMAIC', 'QFD', 'Kano', 'TRIZ', 'Service Des
     position: relative;
     width: 100%;
     padding: var(--space-6) var(--space-4);
-    background: linear-gradient(to top, rgb(20 20 20 / 0.55), transparent);
+    background: linear-gradient(to top, rgb(20 20 20 / 0.7), rgb(20 20 20 / 0.15) 60%, transparent);
     color: #fff;
   }
 
-  .claim {
-    font-size: var(--text-display);
+  .eyebrow {
+    font-size: var(--text-meta);
     font-weight: var(--weight-bold);
-    line-height: 0.95;
-    letter-spacing: -0.02em;
-    max-width: 12ch;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    margin-bottom: var(--space-2);
   }
 
+  /* Ruolo: ora è il testo principale della hero, leggibile (non il claim). */
   .role {
-    margin-top: var(--space-2);
-    font-size: var(--text-h3);
-    font-weight: var(--weight-light);
+    font-size: var(--text-display-small);
+    font-weight: var(--weight-bold);
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    max-width: 20ch;
+    text-shadow: 0 2px 30px rgb(0 0 0 / 0.35);
   }
 
   .cta-row {
     display: flex;
     gap: var(--space-2);
-    margin-top: var(--space-3);
+    margin-top: var(--space-4);
     flex-wrap: wrap;
   }
 
   .cta {
     font-weight: var(--weight-bold);
     border: 1px solid currentColor;
-    padding: 0.7rem 1.4rem;
+    padding: 0.75rem 1.5rem;
     border-radius: 999px;
-    transition: background 0.2s, color 0.2s, border-color 0.2s;
+    transition: background 0.2s, color 0.2s, border-color 0.2s, transform 0.2s;
   }
 
-  .cta:hover {
+  .cta.primary {
     background: var(--color-accent);
     border-color: var(--color-accent);
     color: var(--color-text);
   }
 
-  .cta.ghost {
-    font-weight: var(--weight-regular);
+  .cta.primary:hover {
+    transform: translateY(-2px);
   }
 
-  .cta.small {
-    display: inline-block;
-    margin-top: var(--space-2);
-    padding: 0.5rem 1.1rem;
+  .cta.ghost:hover {
+    background: #fff;
+    color: var(--color-text);
   }
 
-  /* Colonne-categoria stile houseplant: immagine piena + parola grande */
-  .categories {
+  .scroll-hint {
+    display: block;
+    margin-top: var(--space-4);
+    font-size: var(--text-meta);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    opacity: 0.85;
+    animation: bob 2.4s ease-in-out infinite;
+  }
+
+  @keyframes bob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(4px); }
+  }
+
+  /* ---------- Capitoli / categorie ---------- */
+  .chapters {
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: var(--space-8) var(--space-4) var(--space-6);
+  }
+
+  .chapters-title {
+    font-size: var(--text-h2);
+    letter-spacing: -0.01em;
+    margin-bottom: var(--space-4);
+  }
+
+  .chapter-list {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-4);
   }
 
-  .category {
+  .chapter {
+    display: flex;
+    flex-direction: column;
+    color: var(--color-text);
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    overflow: hidden;
+    transition: border-color 0.25s, transform 0.25s, box-shadow 0.25s;
+  }
+
+  .chapter:hover {
+    border-color: var(--color-accent);
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgb(20 20 20 / 0.08);
+  }
+
+  .chapter-media {
     position: relative;
-    display: block;
-    aspect-ratio: 3 / 4;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background: var(--color-border);
+  }
+
+  .chapter-media :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s cubic-bezier(0.2, 0.6, 0.2, 1);
+  }
+
+  .chapter:hover .chapter-media :global(img) {
+    transform: scale(1.05);
+  }
+
+  .num {
+    position: absolute;
+    top: var(--space-2);
+    left: var(--space-2);
+    color: #fff;
+    text-shadow: 0 1px 8px rgb(0 0 0 / 0.5);
+  }
+
+  .chapter-body {
+    padding: var(--space-3);
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    flex: 1;
+  }
+
+  .chapter-body h3 {
+    font-size: var(--text-h3);
+  }
+
+  .chapter-body p {
+    color: var(--color-text-muted);
+    flex: 1;
+  }
+
+  .pill {
+    align-self: flex-start;
+    margin-top: var(--space-2);
+    font-weight: var(--weight-bold);
+    font-size: var(--text-meta);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.4rem 1rem;
+    border-radius: 999px;
+    background: var(--color-text);
+    color: var(--color-bg);
+    transition: background 0.2s, color 0.2s;
+  }
+
+  .chapter:hover .pill {
+    background: var(--color-accent);
+    color: var(--color-text);
+  }
+
+  /* ---------- Caso studio in evidenza ---------- */
+  .featured {
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: var(--space-6) var(--space-4);
+  }
+
+  .featured-inner {
+    display: grid;
+    grid-template-columns: 7fr 5fr;
+    gap: var(--space-4);
+    align-items: center;
+    color: var(--color-text);
+    background: color-mix(in srgb, var(--color-accent) 10%, var(--color-bg));
+    border: 1px solid color-mix(in srgb, var(--color-accent) 40%, var(--color-bg));
+    border-radius: 16px;
     overflow: hidden;
   }
 
-  .category :global(img) {
+  .featured-media {
+    aspect-ratio: 16 / 11;
+    overflow: hidden;
+  }
+
+  .featured-media :global(img) {
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: transform 0.6s cubic-bezier(0.2, 0.6, 0.2, 1);
   }
 
-  .category:hover :global(img) {
-    transform: scale(1.04);
+  .featured-inner:hover .featured-media :global(img) {
+    transform: scale(1.03);
   }
 
-  .category .num {
-    position: absolute;
-    top: var(--space-2);
-    left: var(--space-2);
-    color: #fff;
+  .featured-text {
+    padding: var(--space-4) var(--space-4) var(--space-4) 0;
   }
 
-  .category .label {
-    position: absolute;
-    inset: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #fff;
-    font-size: var(--text-h2);
-    font-weight: var(--weight-bold);
-    text-transform: uppercase;
-    letter-spacing: 0.02em;
-    text-shadow: 0 2px 24px rgb(0 0 0 / 0.45);
+  .featured-text .eyebrow {
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-1);
   }
 
-  .category:hover .label {
-    color: var(--color-accent);
+  .featured-text h2 {
+    font-size: var(--text-h1);
+    letter-spacing: -0.02em;
+    line-height: 1;
   }
 
-  /* Referenze & background */
-  .background {
+  .featured-text .lead {
+    margin: var(--space-2) 0 var(--space-3);
+    color: var(--color-text-muted);
+    font-size: var(--text-h3);
+    font-weight: var(--weight-light);
+  }
+
+  .featured-text .cta {
+    display: inline-block;
+  }
+
+  /* ---------- Referenze & background ---------- */
+  section.background {
+    padding: var(--space-8) var(--space-4);
     max-width: var(--content-max-width);
     margin: 0 auto;
-    padding: var(--space-8) var(--space-4);
   }
 
   .background h2 {
@@ -263,9 +417,6 @@ const MARQUEE_ITEMS = ['Six Sigma', 'DMAIC', 'QFD', 'Kano', 'TRIZ', 'Service Des
     align-items: start;
   }
 
-  /* Il pannello "curriculum" (speed tasks, lingue, Gallup) ha una superficie
-     tinta di lime che lo stacca cromaticamente dal biglietto da visita 3D,
-     che resta su off-white pulito. */
   .facts {
     display: grid;
     gap: var(--space-4);
@@ -305,6 +456,16 @@ const MARQUEE_ITEMS = ['Six Sigma', 'DMAIC', 'QFD', 'Kano', 'TRIZ', 'Service Des
     white-space: nowrap;
   }
 
+  .cta.small {
+    display: inline-block;
+    margin-top: var(--space-2);
+    padding: 0.5rem 1.1rem;
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-text);
+  }
+
+  /* ---------- Contact band ---------- */
   .contact-band {
     display: flex;
     align-items: center;
@@ -323,12 +484,16 @@ const MARQUEE_ITEMS = ['Six Sigma', 'DMAIC', 'QFD', 'Kano', 'TRIZ', 'Service Des
   }
 
   @media (max-width: 900px) {
-    .categories {
+    .chapter-list {
       grid-template-columns: 1fr;
     }
 
-    .category {
-      aspect-ratio: 16 / 10;
+    .featured-inner {
+      grid-template-columns: 1fr;
+    }
+
+    .featured-text {
+      padding: 0 var(--space-4) var(--space-4);
     }
 
     .testimonial-grid {
@@ -341,8 +506,13 @@ const MARQUEE_ITEMS = ['Six Sigma', 'DMAIC', 'QFD', 'Kano', 'TRIZ', 'Service Des
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .category :global(img) {
+    .chapter,
+    .chapter-media :global(img),
+    .featured-media :global(img),
+    .cta.primary,
+    .scroll-hint {
       transition: none;
+      animation: none;
     }
   }
 </style>
