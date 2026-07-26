@@ -189,15 +189,55 @@ const flowAssets = meta.data.assets.filter(
     object-fit: contain;
   }
 
+  /* Testo in colonna leggibile e centrata; le immagini "escono" a tutta
+     larghezza (impaginazione editoriale/scrollytelling). */
   .prose {
-    max-width: 42rem;
-    margin: var(--space-6) 0;
-    line-height: 1.6;
+    max-width: 44rem;
+    margin: var(--space-8) auto;
+    line-height: 1.65;
+    font-size: 1.05rem;
   }
 
   .prose :global(h2) {
-    font-size: var(--text-h3);
-    margin-top: var(--space-4);
+    font-size: var(--text-h2);
+    letter-spacing: -0.01em;
+    line-height: 1.05;
+    margin-top: var(--space-10);
+    margin-bottom: var(--space-2);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .prose :global(h2:first-child) {
+    margin-top: 0;
+    border-top: none;
+    padding-top: 0;
+  }
+
+  .prose :global(p) {
+    margin: var(--space-2) 0;
+  }
+
+  /* Paragrafi che contengono solo un'immagine: breakout oltre la colonna di
+     testo, grandi e centrati sulla pagina. */
+  .prose :global(p:has(> img)) {
+    width: min(92vw, 1100px);
+    max-width: none;
+    margin: var(--space-6) 0;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .prose :global(img) {
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    display: block;
+  }
+
+  .prose :global(strong) {
+    font-weight: var(--weight-bold);
   }
 
   .media-flow {

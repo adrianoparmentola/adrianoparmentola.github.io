@@ -1,61 +1,80 @@
 ---
 title: "Hum.us"
-dek: "Le tecniche del service design come supporto progettuale alla ristorazione."
+dek: "Cinque principi per trasformare una mensa in un nuovo concept di ristorazione collettiva."
 draft: true
 ---
 
-<!-- BOZZE da far correggere ad Adriano: le frasi-sezione sono proposte,
-     i fatti vengono dalla tesi (verificati). Dek ufficiale dal menù portfolio. -->
+<!-- BOZZA da far correggere ad Adriano. I 5 principi e i fatti vengono dalla
+     tesi (verificati); i render sono quelli caricati in cartella. -->
 
-## Ogni intuizione parte da un numero.
+Hum.us Space è un servizio di ristorazione collettiva reale. Il progetto lo
+ripensa senza cambiarne la scala: **stesso grande numero di persone**, ma un
+livello di servizio e una controllabilità di costi e proposte completamente
+diversi. Il nuovo concept si regge su **cinque principi**.
 
-Hum.us Space Bononia è un servizio reale di ristorazione collettiva,
-analizzato e riprogettato con il ciclo **DMAIC** — la spina dorsale
-ingegneristica del Six Sigma — combinato con gli strumenti del service design.
-È anche il mio progetto di tesi.
+## 01 — Servizio 80/20
 
-![Il ciclo DMAIC](./assets/dmaic-scheme.webp)
+**80% preparato in cucina, 20% finito al banco davanti al cliente.** Il gesto
+finale — il "WOW" — alza il livello percepito del piatto senza rallentare la
+linea. La cucina lavora su formati prevedibili, il cliente vede terminare il
+suo piatto.
 
-## Ho misurato il servizio dall'interno.
+![Il bancone: preparazione in back, finitura al banco](./assets/principle-8020.webp)
 
-Osservazione diretta (Gemba Walk), questionari agli stakeholder e
-documentazione gestionale, strutturati in un pannello di KPI: operations,
-customer service, finanza, personalizzazione.
+## 02 — Menù a compartimenti · Base + Topping + WOW
 
-![Il questionario di raccolta dati](./assets/measure-questionnaire.webp)
+Il menù ha lo **stesso formato ogni giorno** e varia per piccoli scarti
+guidati (proteina, topping, tocco finale). Sono **compartimenti stagni**: si
+decide cosa proporre in base allo stock di magazzino, tenendo la qualità
+sempre sullo stesso livello.
 
-![Il pannello dei KPI](./assets/kpi-panel.webp)
+![La wall del menù modulare Base + Topping + WOW](./assets/principle-menu.webp)
 
-## Il confronto coi big della ristorazione collettiva.
+## 03 — Corsia di ritiro veloce
 
-Il benchmark diretto contro i principali operatori italiani ha individuato i
-gap prioritari: produttività, tempi di coda, conformità del menù,
-soddisfazione del cliente.
+Una linea separata per i **ready-meal box**, pronti su un tavolo dedicato:
+ritiro in 10–15 secondi. Taglia la coda del buffet e alleggerisce la
+pressione sulla cucina, rendendo prevedibili gli ordini che la raggiungono.
+
+![La corsia di ritiro veloce con i box pronti](./assets/principle-ritiro.webp)
+
+## 04 — Self-service autonomo
+
+Frutta, snack e complementi in un'**area self-service dedicata**: il cliente
+si serve da solo, il personale resta concentrato sul servizio che conta.
+
+![L'area self-service di frutta e snack](./assets/principle-selfservice.webp)
+
+## 05 — QR universale
+
+Un solo **QR — su cartello e sui box** — per menù, allergeni, feedback e
+ordini. Un unico touchpoint digitale che sostituisce la stampa giornaliera
+dei menu cartacei.
+
+![L'app hum.us: il touchpoint digitale unico](./assets/principle-qr.webp)
+
+## Come ci sono arrivato
+
+I cinque principi non sono intuizioni. Nascono da un percorso **Six Sigma**
+(ciclo DMAIC) e da un **benchmark diretto** contro i grandi operatori della
+ristorazione collettiva: i dati hanno detto dove intervenire.
 
 ![Benchmark competitivo diretto](./assets/analyze-benchmark.webp)
 
-![Baseline vs target sui KPI prioritari](./assets/analyze-baseline-target.webp)
+Da lì, **QFD** e **Kano** hanno tradotto i gap in priorità, e il **TRIZ** ha
+sciolto le contraddizioni chiave — velocità vs qualità, varietà vs food cost,
+personalizzazione vs produttività — nelle cinque soluzioni operative diventate
+i principi del concept.
 
-## Dai gap alle priorità di progetto.
+## Il valore di un designer interno
 
-La matrice **QFD** Cosa/Come e il modello di **Kano** traducono i gap in
-driver di progetto: affidabilità e conformità come requisiti di base,
-velocità e produttività come prestazionali, digitalizzazione e
-personalizzazione come attrattivi.
+Tutta la comunicazione — cartelli, poster, voucher, segnaletica — nasce dalla
+**stessa mano e nello stesso momento** del servizio. Non è un appalto a uno
+studio esterno che cambia team e tempi ad ogni lavoro: è un designer interno
+che vive il progetto ogni giorno, si prende la **responsabilità** delle scelte
+e le giustifica con ricerca e calcoli. Contenuti prodotti su richiesta rapida,
+con una coerenza e una visione che restano coese nel tempo.
 
-![La matrice Cosa/Come](./assets/qfd-matrix.webp)
+![Poster di campagna — prodotti su richiesta rapida](./assets/poster-aperitivo.webp)
 
-![Il modello di Kano applicato al servizio](./assets/kano-model.webp)
-
-## Le contraddizioni diventano soluzioni.
-
-Con il **TRIZ** ogni contraddizione operativa diventa una soluzione concreta:
-corsia di ritiro veloce con meal box modulari, menù modulare nel formato,
-un solo QR per menù, allergeni e feedback, ruoli chiari in sala.
-
-![Da problemi e contraddizioni alle soluzioni operative](./assets/triz-solutions.webp)
-
-## Il metodo diventa campagna.
-
-La campagna visiva — meal box, piatti, poster, voucher, segnaletica — porta
-la stessa identità: *Appetite for Growth*.
+![Comunicazione coordinata al servizio](./assets/poster-bar.webp)
