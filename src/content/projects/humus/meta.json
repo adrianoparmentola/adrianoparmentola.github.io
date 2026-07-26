@@ -6,6 +6,64 @@
   "status": "include",
   "featured": true,
   "methodTags": ["Six Sigma", "DMAIC", "QFD", "Kano", "TRIZ"],
+  "story": [
+    {
+      "num": "01",
+      "title": "Servizio 80/20",
+      "body": "**80% preparato in cucina, 20% finito al banco davanti al cliente.** Il gesto finale — il \"WOW\" — alza il livello percepito del piatto senza rallentare la linea. La cucina lavora su formati prevedibili, il cliente vede terminare il suo piatto.",
+      "media": "principle-8020.webp",
+      "mediaAspect": "wide",
+      "bg": "base"
+    },
+    {
+      "num": "02",
+      "title": "Menù a compartimenti · Base + Topping + WOW",
+      "body": "Il menù ha lo **stesso formato ogni giorno** e varia per piccoli scarti guidati (proteina, topping, tocco finale). Sono **compartimenti stagni**: si decide cosa proporre in base allo stock di magazzino, tenendo la qualità sempre sullo stesso livello.",
+      "media": "principle-menu.webp",
+      "mediaAspect": "wide",
+      "bg": "tint"
+    },
+    {
+      "num": "03",
+      "title": "Corsia di ritiro veloce",
+      "body": "Una linea separata per i **ready-meal box**, pronti su un tavolo dedicato: ritiro in 10–15 secondi. Taglia la coda del buffet e alleggerisce la pressione sulla cucina, rendendo prevedibili gli ordini che la raggiungono.",
+      "media": "principle-ritiro.webp",
+      "mediaAspect": "wide",
+      "bg": "base"
+    },
+    {
+      "num": "04",
+      "title": "Self-service autonomo",
+      "body": "Frutta, snack e complementi in un'**area self-service dedicata**: il cliente si serve da solo, il personale resta concentrato sul servizio che conta.",
+      "media": "principle-selfservice.webp",
+      "mediaAspect": "wide",
+      "bg": "tint"
+    },
+    {
+      "num": "05",
+      "title": "QR universale",
+      "body": "Un solo **QR — su cartello e sui box** — per menù, allergeni, feedback e ordini. Un unico touchpoint digitale che sostituisce la stampa giornaliera dei menu cartacei.",
+      "media": "principle-qr.webp",
+      "mediaAspect": "tall",
+      "bg": "base"
+    },
+    {
+      "eyebrow": "Il metodo",
+      "title": "Come ci sono arrivato",
+      "body": "I cinque principi non sono intuizioni. Nascono da un percorso **Six Sigma** (ciclo DMAIC) e da un **benchmark diretto** contro i grandi operatori della ristorazione collettiva: i dati hanno detto dove intervenire.\n\nDa lì, **QFD** e **Kano** hanno tradotto i gap in priorità, e il **TRIZ** ha sciolto le contraddizioni chiave — velocità vs qualità, varietà vs food cost, personalizzazione vs produttività — nelle cinque soluzioni operative diventate i principi del concept.",
+      "media": "analyze-benchmark.webp",
+      "mediaAspect": "contain",
+      "bg": "dark"
+    },
+    {
+      "eyebrow": "Il valore",
+      "title": "Il valore di un designer interno",
+      "body": "Tutta la comunicazione — cartelli, poster, voucher, segnaletica — nasce dalla **stessa mano e nello stesso momento** del servizio. Non è un appalto a uno studio esterno che cambia team e tempi ad ogni lavoro: è un designer interno che vive il progetto ogni giorno, si prende la **responsabilità** delle scelte e le giustifica con ricerca e calcoli. Contenuti prodotti su richiesta rapida, con una coerenza e una visione che restano coese nel tempo.",
+      "media": "poster-aperitivo.webp",
+      "mediaAspect": "contain",
+      "bg": "warm"
+    }
+  ],
   "assets": [
     { "src": "boxes-showcase.webp", "kind": "image", "role": "hero", "caption": "Le meal box del nuovo servizio" },
     { "src": "all-plates.webp", "kind": "image", "wide": true, "caption": "La collezione di piatti — Base + Topping + WOW" },

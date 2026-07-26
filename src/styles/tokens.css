@@ -79,6 +79,9 @@ html,
 body {
   margin: 0;
   padding: 0;
+  /* le bande full-bleed (100vw) non devono generare scroll orizzontale
+     quando è presente la scrollbar verticale */
+  overflow-x: hidden;
 }
 
 body {

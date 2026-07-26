@@ -5,6 +5,7 @@ import { getProjectAsset } from '../lib/images';
 import { useTranslations, type Lang } from '../i18n/ui';
 import ModelViewer from '../components/ModelViewer.astro';
 import SeasonalToggle from '../components/SeasonalToggle.astro';
+import CaseStory from '../components/CaseStory.astro';
 
 interface Props {
   meta: CollectionEntry<'projectMeta'>;
@@ -99,6 +100,8 @@ const flowAssets = meta.data.assets.filter(
   <div class="prose">
     <Content />
   </div>
+
+  {meta.data.story.length > 0 && <CaseStory slug={slug} sections={meta.data.story} />}
 
   {seasons.length > 0 && <SeasonalToggle seasons={seasons} />}
 

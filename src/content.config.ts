@@ -22,6 +22,25 @@ const projectMeta = defineCollection({
     category: z.enum(['servizi', 'prodotti', 'spazi']).optional(),
     featured: z.boolean().default(false),
     methodTags: z.array(z.string()).default([]),
+    // Racconto a capitoli in bande di sfondo alternate (case study "storytelling").
+    // Se presente, sostituisce il corpo markdown come narrazione principale.
+    // Il body supporta **grassetto** e paragrafi separati da riga vuota.
+    story: z
+      .array(
+        z.object({
+          num: z.string().optional(), // es. "01" (mostrato come occhiello)
+          eyebrow: z.string().optional(), // etichetta sopra il titolo (es. "Metodo")
+          title: z.string(),
+          body: z.string(),
+          media: z.string().optional(), // src in assets/ del progetto (o /public per video)
+          mediaKind: z.enum(['image', 'video']).default('image'),
+          // wide: media a tutta larghezza · contain: proporzione naturale, altezza
+          // limitata (per poster/documenti, così non si stirano) · tall: verticale
+          mediaAspect: z.enum(['wide', 'contain', 'tall']).default('wide'),
+          bg: z.enum(['base', 'tint', 'warm', 'dark']).default('base'),
+        })
+      )
+      .default([]),
     assets: z
       .array(
         z.object({

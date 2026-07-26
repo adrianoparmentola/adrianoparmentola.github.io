@@ -1,0 +1,173 @@
+---
+// Racconto a capitoli in bande di sfondo alternate. Ogni sezione è una banda
+// full-bleed con il proprio colore; il media può essere a tutta larghezza,
+// "contain" (poster/documenti, non stirati) o verticale.
+import { Image } from 'astro:assets';
+import { getProjectAsset } from '../lib/images';
+import type { CollectionEntry } from 'astro:content';
+
+interface Props {
+  slug: string;
+  sections: CollectionEntry<'projectMeta'>['data']['story'];
+}
+
+const { slug, sections } = Astro.props;
+
+// Mini-formatter: escape HTML, poi **grassetto** -> <strong>, righe vuote -> <p>.
+function renderBody(body: string): string {
+  const esc = (s: string) =>
+    s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return body
+    .split(/\n\s*\n/)
+    .map((para) => {
+      const html = esc(para.trim()).replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+      return `<p>${html}</p>`;
+    })
+    .join('');
+}
+
+const items = sections.map((s) => ({
+  ...s,
+  image: s.media && s.mediaKind === 'image' ? getProjectAsset(slug, s.media) : undefined,
+  html: renderBody(s.body),
+}));
+---
+
+<div class="case-story">
+  {
+    items.map((s) => (
+      <section class:list={['band', `bg-${s.bg}`]}>
+        <div class="band-inner reveal">
+          <div class="band-text">
+            {(s.num || s.eyebrow) && (
+              <p class="eyebrow">
+                {s.num && <span class="num">{s.num}</span>}
+                {s.eyebrow}
+              </p>
+            )}
+            <h2>{s.title}</h2>
+            <div class="body" set:html={s.html} />
+          </div>
+          {s.image && (
+            <figure class:list={['band-media', s.mediaAspect]}>
+              <Image src={s.image} alt={s.title} widths={[640, 1200, 2000]} sizes="100vw" />
+            </figure>
+          )}
+          {s.media && s.mediaKind === 'video' && (
+            <figure class:list={['band-media', s.mediaAspect]}>
+              <video src={s.media} autoplay muted loop playsinline />
+            </figure>
+          )}
+        </div>
+      </section>
+    ))
+  }
+</div>
+
+<style>
+  .band {
+    /* full-bleed: esce dai padding del contenitore pagina */
+    width: 100vw;
+    margin-left: 50%;
+    transform: translateX(-50vw);
+  }
+
+  .bg-base {
+    background: var(--color-bg);
+  }
+  .bg-tint {
+    background: color-mix(in srgb, var(--color-accent) 12%, var(--color-bg));
+  }
+  .bg-warm {
+    background: color-mix(in srgb, #e8a23d 14%, var(--color-bg));
+  }
+  .bg-dark {
+    background: var(--color-text);
+    color: var(--color-bg);
+  }
+
+  .band-inner {
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: var(--space-8) var(--space-4);
+  }
+
+  .band-text {
+    max-width: 44rem;
+  }
+
+  .eyebrow {
+    display: flex;
+    align-items: baseline;
+    gap: 0.6rem;
+    font-size: var(--text-meta);
+    font-weight: var(--weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-2);
+  }
+
+  .bg-dark .eyebrow {
+    color: color-mix(in srgb, var(--color-bg) 70%, transparent);
+  }
+
+  .num {
+    color: var(--color-accent);
+    font-size: var(--text-h3);
+    letter-spacing: 0;
+  }
+
+  h2 {
+    font-size: var(--text-h2);
+    letter-spacing: -0.01em;
+    line-height: 1.05;
+  }
+
+  .body {
+    margin-top: var(--space-2);
+    font-size: 1.05rem;
+    line-height: 1.65;
+    max-width: 40rem;
+  }
+
+  .body :global(p) {
+    margin: var(--space-2) 0;
+  }
+
+  .band-media {
+    margin: var(--space-4) 0 0;
+  }
+
+  .band-media :global(img),
+  .band-media video {
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+    display: block;
+  }
+
+  /* poster/documenti: proporzione naturale, altezza limitata, centrati */
+  .band-media.contain :global(img),
+  .band-media.contain video {
+    width: auto;
+    max-width: 100%;
+    max-height: 30rem;
+    margin-inline: auto;
+    border-radius: 8px;
+  }
+
+  .band-media.tall :global(img) {
+    width: auto;
+    max-width: 100%;
+    max-height: 40rem;
+    margin-inline: auto;
+  }
+
+  @media (min-width: 900px) {
+    /* media wide: sfora leggermente oltre la colonna di testo */
+    .band-media.wide {
+      max-width: 1100px;
+    }
+  }
+</style>
