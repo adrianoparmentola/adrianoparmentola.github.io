@@ -8,6 +8,17 @@
   "methodTags": ["Six Sigma", "DMAIC", "QFD", "Kano", "TRIZ"],
   "story": [
     {
+      "lead": true,
+      "body": "La ristorazione è ferma: progettata per preconcetti e standard di servizio, decisa dai numeri di investitori, imprenditori e franchise.\n\nIl mio obiettivo da progettista è renderla di nuovo **personale**: etica, legata al cliente, capace di ammaliare e divertire.\n\nCon un metodo — **Six Sigma for innovation of hospitality and events**.",
+      "bg": "dark"
+    },
+    {
+      "eyebrow": "Il caso",
+      "title": "Hum.us Space",
+      "body": "Il primo banco di prova: un servizio di ristorazione collettiva reale. Il progetto lo ripensa **senza cambiarne la scala** — stesso grande numero di persone — ma con un livello di servizio e una controllabilità di costi e proposte completamente diversi. Il nuovo concept si regge su **cinque principi**.",
+      "bg": "base"
+    },
+    {
       "num": "01",
       "title": "Servizio 80/20",
       "body": "**80% preparato in cucina, 20% finito al banco davanti al cliente.** Il gesto finale — il \"WOW\" — alza il livello percepito del piatto senza rallentare la linea. La cucina lavora su formati prevedibili, il cliente vede terminare il suo piatto.",

@@ -30,7 +30,10 @@ const projectMeta = defineCollection({
         z.object({
           num: z.string().optional(), // es. "01" (mostrato come occhiello)
           eyebrow: z.string().optional(), // etichetta sopra il titolo (es. "Metodo")
-          title: z.string(),
+          // lead: sezione-manifesto, testo grande a tutta pagina (frase-hero),
+          // senza titolo/numero. Usata come apertura del racconto.
+          lead: z.boolean().default(false),
+          title: z.string().optional(),
           body: z.string(),
           media: z.string().optional(), // src in assets/ del progetto (o /public per video)
           mediaKind: z.enum(['image', 'video']).default('image'),
