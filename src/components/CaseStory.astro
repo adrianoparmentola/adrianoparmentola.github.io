@@ -54,7 +54,7 @@ const items = sections.map((s) => ({
           )}
           {s.image && (
             <figure class:list={['band-media', s.mediaAspect]}>
-              <Image src={s.image} alt={s.title} widths={[640, 1200, 2000]} sizes="100vw" />
+              <Image src={s.image} alt={s.title ?? ''} widths={[640, 1200, 2000]} sizes="100vw" />
             </figure>
           )}
           {s.media && s.mediaKind === 'video' && (
