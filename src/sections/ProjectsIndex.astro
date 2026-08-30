@@ -35,10 +35,12 @@ const LAYOUT: { key: 'servizi' | 'prodotti' | 'spazi'; cells: Cell[] }[] = [
   {
     key: 'servizi',
     cells: [
-      { slug: 'humus', span: 4, aspect: 'landscape' },
+      // 5 progetti su griglia a 6 colonne: 3+3 e 2+2+2, righe piene.
+      { slug: 'humus', span: 3, aspect: 'landscape' },
+      { slug: 'sabor-de-espana', span: 3, aspect: 'landscape' },
+      { slug: 'contatto', span: 2, aspect: 'standard' },
       { slug: 'linea-dotta', span: 2, aspect: 'standard' },
       { slug: 'safe-to-work', span: 2, aspect: 'standard' },
-      { slug: 'contatto', span: 4, aspect: 'landscape' },
     ],
   },
   {

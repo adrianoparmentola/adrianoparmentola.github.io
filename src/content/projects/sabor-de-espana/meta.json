@@ -1,0 +1,77 @@
+{
+  "name": "Sabor de España",
+  "year": "2026",
+  "type": "servizio",
+  "category": "servizi",
+  "status": "include",
+  "featured": true,
+  "methodTags": ["Service Design", "Food Experience", "Storytelling"],
+  "story": [
+    {
+      "lead": true,
+      "body": "Una cena non si organizza.\n\nSi **progetta**: tempi, gesti, sequenza. Quello che le persone si portano a casa non è il piatto — è quello che hanno **imparato a fare**.",
+      "bg": "dark"
+    },
+    {
+      "eyebrow": "Il committente",
+      "title": "Diciotto persone, quattro ore, una cucina.",
+      "body": "We Find Group Talent Acquisition mi chiede un'esperienza di cucina spagnola per diciotto studenti UCLA in trasferta a Madrid. Età media ventidue anni, nessuno di loro cucina spagnolo.\n\nHo condotto il workshop in inglese, tenendo i termini culinari in spagnolo: pan tumaca, socarrat, cuajado. Le parole fanno parte del piatto.",
+      "media": "venue.webp",
+      "mediaAspect": "wide",
+      "bg": "base"
+    },
+    {
+      "eyebrow": "La decisione",
+      "title": "Ho tolto il jamón dal menù.",
+      "body": "Era la voce più costosa e la più prevedibile. Ma il motivo per cui l'ho eliminata è un altro: **affettare non è cucinare**. Il jamón si serve, non si prepara — e un'ora di workshop spesa a guardare qualcuno che affetta è un'ora persa.\n\nAl suo posto: gildas e patatas bravas. Si infilzano, si friggono, si assemblano. Costo degli ingredienti più basso, mani impegnate per tutto il tempo.",
+      "media": "gildas.webp",
+      "mediaAspect": "wide",
+      "bg": "tint"
+    },
+    {
+      "eyebrow": "Il menù",
+      "title": "Cinque portate, cinque tecniche.",
+      "body": "Ogni piatto insegna un gesto diverso. Pan tumaca: strofinare. Tapas: friggere e infilzare. Tortilla: il volteo, girare la padella. Paella: non mescolare mai. Crema catalana: fiammeggiare lo zucchero.\n\nNessuna portata è lì per riempire. Se un piatto non aggiunge una tecnica, esce dal menù.",
+      "media": "tapas-served.webp",
+      "mediaAspect": "wide",
+      "bg": "base"
+    },
+    {
+      "eyebrow": "Il piatto simbolo",
+      "title": "La paella vera non ha chorizo.",
+      "body": "Niente chorizo, niente frutti di mare: riso, pollo, coniglio, garrofó, fagiolini, pomodoro, olio, zafferano, paprika, acqua. Dieci ingredienti, nati nell'Albufera di Valencia.\n\nIl momento che aspettano tutti è il **socarrat**, la crosta caramellata sul fondo. Non si vede: si sente dall'odore e dallo scricchiolio.",
+      "media": "/videos/sabor-paella.mp4",
+      "mediaKind": "video",
+      "mediaAspect": "wide",
+      "bg": "dark"
+    },
+    {
+      "eyebrow": "Il kit",
+      "title": "Il servizio parla anche quando io sono dall'altra parte della cucina.",
+      "body": "Con diciotto persone non puoi ripetere la stessa storia diciotto volte. Ho stampato story card e bandierine da tavolo: origine del piatto, aneddoto, allergeni.\n\nChi resta indietro legge. Chi è curioso approfondisce. Io intanto sono al fuoco.",
+      "media": "story-cards.webp",
+      "mediaAspect": "wide",
+      "bg": "warm"
+    },
+    {
+      "eyebrow": "L'esito",
+      "title": "Hanno cucinato, non assaggiato.",
+      "body": "Alla fine delle quattro ore ogni partecipante aveva fritto le sue bravas, girato la sua tortilla e bruciato il suo zucchero.\n\nÈ la differenza tra una degustazione e un servizio: alla degustazione assisti, un servizio lo attraversi.",
+      "media": "group-final.webp",
+      "mediaAspect": "wide",
+      "bg": "base"
+    }
+  ],
+  "assets": [
+    { "src": "paella-hero.webp", "kind": "image", "role": "hero", "caption": "Paella Valenciana — i dieci ingredienti originali" },
+    { "src": "patatas-bravas.webp", "kind": "image", "caption": "Patatas bravas, fritte dai partecipanti" },
+    { "src": "tortilla.webp", "kind": "image", "caption": "Tortilla de patatas — il centro resta morbido" },
+    { "src": "paella-pan.webp", "kind": "image", "wide": true, "caption": "La paellera: il riso non si mescola mai" },
+    { "src": "mise-en-place.webp", "kind": "image", "caption": "Mise en place delle tapas" },
+    { "src": "prep-potatoes.webp", "kind": "image", "caption": "Tre chili di patate, tagliate a mano" },
+    { "src": "cooking.webp", "kind": "image", "caption": "In cucina durante il workshop" },
+    { "src": "plating.webp", "kind": "image", "caption": "Impiattamento al tavolo" },
+    { "src": "toast.webp", "kind": "image", "caption": "Il brindisi finale" },
+    { "src": "group-kitchen.webp", "kind": "image", "wide": true, "caption": "Il gruppo a fine servizio" }
+  ]
+}

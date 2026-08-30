@@ -1,0 +1,192 @@
+---
+// Blocco personale in home: testo giustificato bold come oggetto grafico
+// (blocco pieno, sillabazione attiva) + griglia di foto personali.
+// Il testo arriva dalle chiavi i18n about.* — se contiene ancora i
+// segnaposto, resta visibile che manca (nessun testo inventato online).
+import { Image } from 'astro:assets';
+import { getPersonalPhotos } from '../lib/personal';
+import { useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+// **parola** -> evidenziata in lime. Stessa convenzione di CaseStory.
+function renderBody(body: string): string {
+  const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return esc(body)
+    .split(/\n\s*\n/)
+    .map((p) => `<p>${p.trim().replace(/\*\*(.+?)\*\*/g, '<span class="mark">$1</span>')}</p>`)
+    .join('');
+}
+
+const bodyHtml = renderBody(t('about.body'));
+const interests = t('about.interests')
+  .split('·')
+  .map((s) => s.trim())
+  .filter(Boolean);
+
+const photos = getPersonalPhotos();
+const hasPhotos = photos.length > 0;
+---
+
+<section class="personal">
+  <div class:list={['inner', { 'no-photos': !hasPhotos }]}>
+    <div class="text-col">
+      <p class="eyebrow">{t('about.title')}</p>
+      <div class="justified" lang={lang} set:html={bodyHtml} />
+
+      {
+        interests.length > 0 && (
+          <div class="interests">
+            <p class="eyebrow">{t('about.interests.title')}</p>
+            <ul>
+              {interests.map((item) => (
+                <li>{item}</li>
+              ))}
+            </ul>
+          </div>
+        )
+      }
+    </div>
+
+    {
+      hasPhotos && (
+        <div class="photos">
+          {photos.slice(0, 4).map((photo, i) => (
+            <figure class:list={['shot', { lead: i === 0 }]}>
+              <Image src={photo} alt="" widths={[400, 800]} sizes="(max-width: 900px) 50vw, 25vw" />
+            </figure>
+          ))}
+        </div>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  .personal {
+    /* full-bleed come le bande dei casi studio */
+    width: 100vw;
+    margin-left: 50%;
+    transform: translateX(-50vw);
+    background: var(--color-text);
+    color: var(--color-bg);
+  }
+
+  .inner {
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: var(--space-12) var(--space-4);
+    display: grid;
+    grid-template-columns: 7fr 5fr;
+    gap: var(--space-8);
+    align-items: start;
+  }
+
+  .inner.no-photos {
+    grid-template-columns: 1fr;
+    max-width: 60rem;
+  }
+
+  .eyebrow {
+    font-size: var(--text-meta);
+    font-weight: var(--weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: color-mix(in srgb, var(--color-bg) 60%, transparent);
+    margin-bottom: var(--space-3);
+  }
+
+  /* Il paragrafo giustificato è l'oggetto grafico: blocco pieno, bold,
+     interlinea stretta. hyphens+lang evitano i "fiumi" bianchi che
+     rovinano il giustificato in italiano. */
+  .justified {
+    text-align: justify;
+    text-justify: inter-word;
+    hyphens: auto;
+    font-weight: var(--weight-bold);
+    font-size: clamp(1.5rem, 1rem + 1.5vw, 2.4rem);
+    line-height: 1.18;
+    letter-spacing: -0.01em;
+  }
+
+  .justified :global(p) {
+    margin: 0 0 0.6em;
+  }
+
+  .justified :global(p:last-child) {
+    margin-bottom: 0;
+  }
+
+  .justified :global(.mark) {
+    box-shadow: inset 0 -0.3em 0 var(--color-accent);
+  }
+
+  .interests {
+    margin-top: var(--space-6);
+    padding-top: var(--space-4);
+    border-top: 1px solid color-mix(in srgb, var(--color-bg) 25%, transparent);
+  }
+
+  .interests ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-3);
+  }
+
+  .interests li {
+    font-size: var(--text-h3);
+    font-weight: var(--weight-bold);
+    color: color-mix(in srgb, var(--color-bg) 78%, transparent);
+  }
+
+  .interests li:hover {
+    color: var(--color-accent);
+  }
+
+  /* Griglia foto: la prima grande e verticale, le altre piccole */
+  .photos {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2);
+  }
+
+  .shot {
+    margin: 0;
+    overflow: hidden;
+  }
+
+  .shot :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    aspect-ratio: 1 / 1;
+  }
+
+  .shot.lead {
+    grid-column: 1 / -1;
+  }
+
+  .shot.lead :global(img) {
+    aspect-ratio: 4 / 5;
+  }
+
+  @media (max-width: 900px) {
+    .inner {
+      grid-template-columns: 1fr;
+      padding-block: var(--space-8);
+    }
+
+    .justified {
+      text-align: left;
+    }
+  }
+</style>

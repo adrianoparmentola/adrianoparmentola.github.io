@@ -7,6 +7,7 @@ import { Image } from 'astro:assets';
 import TestimonialCard from '../components/TestimonialCard.astro';
 import ModelViewer from '../components/ModelViewer.astro';
 import Marquee from '../components/Marquee.astro';
+import PersonalBlock from '../components/PersonalBlock.astro';
 import { getCollection } from 'astro:content';
 import { getProjectAsset } from '../lib/images';
 import { getProjectCopy } from '../lib/content';
@@ -89,6 +90,8 @@ const MARQUEE_ITEMS = ['Six Sigma', 'DMAIC', 'QFD', 'Kano', 'TRIZ', 'Service Des
 </section>
 
 <Marquee items={MARQUEE_ITEMS} />
+
+<PersonalBlock lang={lang} />
 
 <section class="background" id="background">
   <h2 class="reveal">{t('background.title')}</h2>
