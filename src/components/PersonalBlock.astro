@@ -34,7 +34,7 @@ const hasPhotos = photos.length > 0;
 ---
 
 <section class="personal">
-  <div class:list={['inner', { 'no-photos': !hasPhotos }]}>
+  <div class="inner">
     <div class="text-col">
       <p class="eyebrow">{t('about.title')}</p>
       <div class="justified" lang={lang} set:html={bodyHtml} />
@@ -54,12 +54,20 @@ const hasPhotos = photos.length > 0;
     </div>
 
     {
-      hasPhotos && (
+      hasPhotos ? (
         <div class="photos">
           {photos.slice(0, 4).map((photo, i) => (
             <figure class:list={['shot', { lead: i === 0 }]}>
               <Image src={photo} alt="" widths={[400, 800]} sizes="(max-width: 900px) 50vw, 25vw" />
             </figure>
+          ))}
+        </div>
+      ) : (
+        <div class="photos">
+          {[0, 1, 2, 3].map((i) => (
+            <div class:list={['shot', 'ph', { lead: i === 0 }]}>
+              {i === 0 && <span>{t('about.photos.soon')}</span>}
+            </div>
           ))}
         </div>
       )
@@ -85,11 +93,6 @@ const hasPhotos = photos.length > 0;
     grid-template-columns: 7fr 5fr;
     gap: var(--space-8);
     align-items: start;
-  }
-
-  .inner.no-photos {
-    grid-template-columns: 1fr;
-    max-width: 60rem;
   }
 
   .eyebrow {
@@ -169,6 +172,24 @@ const hasPhotos = photos.length > 0;
     object-fit: cover;
     display: block;
     aspect-ratio: 1 / 1;
+  }
+
+  .shot.ph {
+    display: grid;
+    place-items: center;
+    border: 1px dashed color-mix(in srgb, var(--color-bg) 35%, transparent);
+    aspect-ratio: 1 / 1;
+    color: color-mix(in srgb, var(--color-bg) 55%, transparent);
+    font-size: var(--text-meta);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: var(--weight-bold);
+    text-align: center;
+    padding: var(--space-2);
+  }
+
+  .shot.ph.lead {
+    aspect-ratio: 4 / 5;
   }
 
   .shot.lead {

@@ -1,11 +1,9 @@
 ---
 title: "Sabor de España"
-dek: "Workshop di cucina spagnola per diciotto persone, progettato come un servizio."
+dek: "Un dinner club spagnolo: si cucina insieme, si mangia in casa, niente ristorante."
 draft: true
 ---
 
-<!-- BOZZA da far correggere ad Adriano. Fatti verificati da ricevuta di
-     prestazione occasionale e proposta workshop. Il compenso NON va citato. -->
+<!-- BOZZA da far correggere ad Adriano. Il compenso non va mai citato. -->
 
-Madrid, 5 agosto 2026. Quattro ore, diciotto partecipanti, una cucina
-professionale. Il primo progetto che ho consegnato a un cliente vero.
+Madrid, agosto 2026. Diciotto persone, una cucina, quattro ore.

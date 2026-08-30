@@ -101,7 +101,7 @@ const flowAssets = meta.data.assets.filter(
     <Content />
   </div>
 
-  {meta.data.story.length > 0 && <CaseStory slug={slug} sections={meta.data.story} />}
+  {meta.data.story.length > 0 && <CaseStory slug={slug} sections={meta.data.story} lang={lang} />}
 
   {seasons.length > 0 && <SeasonalToggle seasons={seasons} />}
 

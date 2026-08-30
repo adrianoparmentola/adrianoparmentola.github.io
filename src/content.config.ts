@@ -41,6 +41,9 @@ const projectMeta = defineCollection({
           // limitata (per poster/documenti, così non si stirano) · tall: verticale
           mediaAspect: z.enum(['wide', 'contain', 'tall']).default('wide'),
           bg: z.enum(['base', 'tint', 'warm', 'dark']).default('base'),
+          // Pulsante opzionale in coda alla banda (es. "il servizio si prenota").
+          ctaLabel: z.string().optional(),
+          ctaHref: z.string().optional(),
         })
       )
       .default([]),

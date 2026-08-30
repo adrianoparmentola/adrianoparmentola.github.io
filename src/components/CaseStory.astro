@@ -9,9 +9,10 @@ import type { CollectionEntry } from 'astro:content';
 interface Props {
   slug: string;
   sections: CollectionEntry<'projectMeta'>['data']['story'];
+  lang?: string;
 }
 
-const { slug, sections } = Astro.props;
+const { slug, sections, lang = 'it' } = Astro.props;
 
 // Mini-formatter: escape HTML, poi **grassetto** -> <strong>, righe vuote -> <p>.
 function renderBody(body: string): string {
@@ -30,6 +31,8 @@ const items = sections.map((s) => ({
   ...s,
   image: s.media && s.mediaKind === 'image' ? getProjectAsset(slug, s.media) : undefined,
   html: renderBody(s.body),
+  // negli href il segnaposto {lang} diventa la lingua corrente
+  ctaHref: s.ctaHref?.replace('{lang}', lang),
 }));
 ---
 
@@ -50,6 +53,11 @@ const items = sections.map((s) => ({
             )}
             {s.title && <h2>{s.title}</h2>}
             <div class="body" set:html={s.html} />
+            {s.ctaLabel && s.ctaHref && (
+              <a class="band-cta" href={s.ctaHref}>
+                {s.ctaLabel} →
+              </a>
+            )}
           </div>
           )}
           {s.image && (
@@ -168,6 +176,21 @@ const items = sections.map((s) => ({
 
   .body :global(p) {
     margin: var(--space-2) 0;
+  }
+
+  .band-cta {
+    display: inline-block;
+    margin-top: var(--space-4);
+    font-weight: var(--weight-bold);
+    background: var(--color-accent);
+    color: var(--color-text);
+    border-radius: 999px;
+    padding: 0.75rem 1.5rem;
+    transition: transform 0.2s;
+  }
+
+  .band-cta:hover {
+    transform: translateY(-2px);
   }
 
   .band-media {

@@ -1,11 +1,9 @@
 ---
 title: "Sabor de España"
-dek: "A Spanish cooking workshop for eighteen people, designed as a service."
+dek: "A Spanish dinner club: cook together, eat at home, no restaurant."
 draft: true
 ---
 
-<!-- DRAFT — facts verified from the occasional-work receipt and the workshop
-     proposal. The fee must never be published. -->
+<!-- DRAFT — the fee must never be published. -->
 
-Madrid, 5 August 2026. Four hours, eighteen participants, a professional
-kitchen. The first project I delivered to a paying client.
+Madrid, August 2026. Eighteen people, one kitchen, four hours.
