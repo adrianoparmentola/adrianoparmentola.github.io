@@ -5,7 +5,11 @@
   "category": "servizi",
   "status": "include",
   "featured": true,
-  "methodTags": ["Dinner club", "Food experience", "Hospitality"],
+  "methodTags": [
+    "Dinner club",
+    "Food experience",
+    "Hospitality"
+  ],
   "story": [
     {
       "lead": true,
@@ -57,7 +61,7 @@
       "eyebrow": "Perché funziona",
       "title": "La gente cerca un motivo per stare insieme davvero.",
       "body": "Al ristorante parli con chi hai di fronte, per due ore, e poi paghi. Qui si cucina insieme, ci si passa i piatti, si sta in piedi in cucina.\n\nSparisce il filtro: niente formalità, niente turni al tavolo, nessuno che ti porta il conto. Resta solo la sera con altre persone — che è la cosa che tutti cercavano dall'inizio.",
-      "media": "festa.webp",
+      "media": "serata.webp",
       "mediaAspect": "wide",
       "bg": "base"
     },
@@ -73,13 +77,52 @@
     }
   ],
   "assets": [
-    { "src": "paella.webp", "kind": "image", "role": "hero", "caption": "Paella valenciana — il riso non si mescola mai" },
-    { "src": "bravas.webp", "kind": "image", "caption": "Patatas bravas" },
-    { "src": "gildas.webp", "kind": "image", "caption": "Gildas — oliva, pepinillo, acciuga" },
-    { "src": "mise-en-place.webp", "kind": "image", "caption": "La mise en place delle tapas" },
-    { "src": "cucina.webp", "kind": "image", "caption": "Si cucina insieme" },
-    { "src": "tavola.webp", "kind": "image", "wide": true, "caption": "La tavola pronta" },
-    { "src": "brindisi.webp", "kind": "image", "caption": "Il brindisi" },
-    { "src": "gruppo-cucina.webp", "kind": "image", "caption": "Fine serata" }
+    {
+      "src": "paella.webp",
+      "kind": "image",
+      "role": "hero",
+      "caption": "Paella valenciana — il riso non si mescola mai"
+    },
+    {
+      "src": "bravas.webp",
+      "kind": "image",
+      "caption": "Patatas bravas"
+    },
+    {
+      "src": "gildas.webp",
+      "kind": "image",
+      "caption": "Gildas — oliva, pepinillo, acciuga"
+    },
+    {
+      "src": "mise-en-place.webp",
+      "kind": "image",
+      "caption": "La mise en place delle tapas"
+    },
+    {
+      "src": "cucina.webp",
+      "kind": "image",
+      "caption": "Si cucina insieme"
+    },
+    {
+      "src": "tavola.webp",
+      "kind": "image",
+      "wide": true,
+      "caption": "La tavola pronta"
+    },
+    {
+      "src": "festa.webp",
+      "kind": "image",
+      "caption": "La serata"
+    },
+    {
+      "src": "brindisi.webp",
+      "kind": "image",
+      "caption": "Il brindisi"
+    },
+    {
+      "src": "gruppo-cucina.webp",
+      "kind": "image",
+      "caption": "Fine serata"
+    }
   ]
 }

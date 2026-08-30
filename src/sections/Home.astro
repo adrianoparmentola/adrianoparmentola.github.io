@@ -7,6 +7,7 @@ import { Image } from 'astro:assets';
 import TestimonialCard from '../components/TestimonialCard.astro';
 import ModelViewer from '../components/ModelViewer.astro';
 import Marquee from '../components/Marquee.astro';
+import HeroBillboard from '../components/HeroBillboard.astro';
 import PersonalBlock from '../components/PersonalBlock.astro';
 import { getCollection } from 'astro:content';
 import { getProjectAsset } from '../lib/images';
@@ -37,17 +38,12 @@ const featuredCopy = await getProjectCopy('humus', lang);
 const MARQUEE_ITEMS = ['Six Sigma', 'DMAIC', 'QFD', 'Kano', 'TRIZ', 'Service Design', 'VRED', 'Blender'];
 ---
 
-<section class="hero">
-  <video src="/videos/hero-talea.mp4" autoplay muted loop playsinline aria-hidden="true"></video>
-  <div class="overlay">
-    <p class="eyebrow reveal">{t('home.eyebrow')}</p>
-    <h1 class="role reveal" style="--delay: 100ms">{t('home.role')}</h1>
-    <div class="cta-row reveal" style="--delay: 220ms">
-      <a class="cta primary" href={`/${lang}/projects/`}>{t('home.cta.projects')} →</a>
-      <a class="cta ghost" href={`/${lang}/contact/`}>{t('home.cta.contact')}</a>
-    </div>
-    <span class="scroll-hint reveal" style="--delay: 340ms">{t('home.scroll')} ↓</span>
-  </div>
+<HeroBillboard lang={lang} />
+
+<section class="hero-actions">
+  <a class="cta primary" href={`/${lang}/projects/`}>{t('home.cta.projects')} →</a>
+  <a class="cta ghost dark" href={`/${lang}/contact/`}>{t('home.cta.contact')}</a>
+  <span class="scroll-hint">{t('home.scroll')} ↓</span>
 </section>
 
 <section class="chapters">
@@ -148,54 +144,15 @@ const MARQUEE_ITEMS = ['Six Sigma', 'DMAIC', 'QFD', 'Kano', 'TRIZ', 'Service Des
 </section>
 
 <style>
-  /* ---------- Hero ---------- */
-  .hero {
-    position: relative;
-    min-height: 84vh;
-    overflow: hidden;
+  /* ---------- Riga azioni sotto il billboard ---------- */
+  .hero-actions {
     display: flex;
-    align-items: flex-end;
-  }
-
-  .hero video {
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-  }
-
-  .overlay {
-    position: relative;
-    width: 100%;
-    padding: var(--space-6) var(--space-4);
-    background: linear-gradient(to top, rgb(20 20 20 / 0.7), rgb(20 20 20 / 0.15) 60%, transparent);
-    color: #fff;
-  }
-
-  .eyebrow {
-    font-size: var(--text-meta);
-    font-weight: var(--weight-bold);
-    text-transform: uppercase;
-    letter-spacing: 0.14em;
-    margin-bottom: var(--space-2);
-  }
-
-  /* Ruolo: ora è il testo principale della hero, leggibile (non il claim). */
-  .role {
-    font-size: var(--text-display-small);
-    font-weight: var(--weight-bold);
-    line-height: 1.08;
-    letter-spacing: -0.01em;
-    max-width: 20ch;
-    text-shadow: 0 2px 30px rgb(0 0 0 / 0.35);
-  }
-
-  .cta-row {
-    display: flex;
-    gap: var(--space-2);
-    margin-top: var(--space-4);
+    align-items: center;
+    gap: var(--space-2) var(--space-3);
     flex-wrap: wrap;
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: var(--space-4);
   }
 
   .cta {
@@ -216,24 +173,21 @@ const MARQUEE_ITEMS = ['Six Sigma', 'DMAIC', 'QFD', 'Kano', 'TRIZ', 'Service Des
     transform: translateY(-2px);
   }
 
-  .cta.ghost:hover {
-    background: #fff;
-    color: var(--color-text);
+  .cta.ghost {
+    font-weight: var(--weight-regular);
+  }
+
+  .cta.ghost.dark:hover {
+    background: var(--color-text);
+    color: var(--color-bg);
   }
 
   .scroll-hint {
-    display: block;
-    margin-top: var(--space-4);
     font-size: var(--text-meta);
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    opacity: 0.85;
-    animation: bob 2.4s ease-in-out infinite;
-  }
-
-  @keyframes bob {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(4px); }
+    color: var(--color-text-muted);
+    margin-left: auto;
   }
 
   /* ---------- Capitoli / categorie ---------- */

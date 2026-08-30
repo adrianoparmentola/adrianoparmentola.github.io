@@ -1,0 +1,329 @@
+---
+// Hero come billboard a carosello: i progetti in evidenza scorrono con
+// titolo e sottotitolo. Sostituisce il vecchio video full-bleed (7,6 MB
+// caricati sempre) con immagini ottimizzate: home molto più leggera.
+import { Image } from 'astro:assets';
+import { getProjectAsset } from '../lib/images';
+import { getProjectCopy } from '../lib/content';
+import { useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+// Selezione: i progetti in evidenza più forti visivamente, una per categoria.
+const PICKS = [
+  { slug: 'sabor-de-espana', image: 'serata.webp' },
+  { slug: 'talea', image: 'hero-clean.webp' },
+  { slug: 'humus', image: 'boxes-showcase.webp' },
+  { slug: 'contatto', image: 'hero.webp' },
+  { slug: 'autonomia', image: 'hero.webp' },
+];
+
+const slides = (
+  await Promise.all(
+    PICKS.map(async ({ slug, image }) => {
+      const copy = await getProjectCopy(slug, lang);
+      const img = getProjectAsset(slug, image);
+      if (!copy || !img) return null;
+      return {
+        slug,
+        img,
+        title: copy.data.title,
+        sub: copy.data.dek ?? '',
+        href: `/${lang}/projects/${slug}/`,
+      };
+    })
+  )
+).filter((s) => s !== null);
+---
+
+<section class="billboard" aria-roledescription="carousel" aria-label={t('hero.label')}>
+  <p class="role">{t('home.role')}</p>
+
+  <div class="stage">
+    {
+      slides.map((s, i) => (
+        <article class="slide" data-index={i} aria-hidden={i === 0 ? 'false' : 'true'}>
+          <Image
+            class="bg"
+            src={s!.img}
+            alt=""
+            widths={[900, 1400, 2000]}
+            sizes="100vw"
+            loading={i === 0 ? 'eager' : 'lazy'}
+          />
+          <div class="content">
+            <p class="eyebrow">
+              {t('hero.featured')}
+              <span class="count">0{i + 1} / 0{slides.length}</span>
+            </p>
+            <h1>{s!.title}</h1>
+            {s!.sub && <p class="sub">{s!.sub}</p>}
+            <a class="cta" href={s!.href}>{t('hero.discover')} →</a>
+          </div>
+        </article>
+      ))
+    }
+  </div>
+
+  <div class="controls">
+    <button class="arrow" data-dir="-1" aria-label={t('hero.prev')}>←</button>
+    <div class="dots" role="tablist">
+      {
+        slides.map((s, i) => (
+          <button
+            class="dot"
+            data-goto={i}
+            role="tab"
+            aria-selected={i === 0 ? 'true' : 'false'}
+            aria-label={s!.title}
+          />
+        ))
+      }
+    </div>
+    <button class="arrow" data-dir="1" aria-label={t('hero.next')}>→</button>
+  </div>
+</section>
+
+<script>
+  function initBillboard() {
+    const box = document.querySelector<HTMLElement>('.billboard');
+    if (!box || box.dataset.ready === '1') return;
+    box.dataset.ready = '1';
+
+    const slides = Array.from(box.querySelectorAll<HTMLElement>('.slide'));
+    const dots = Array.from(box.querySelectorAll<HTMLElement>('.dot'));
+    if (slides.length < 2) return;
+
+    let current = 0;
+    let timer: number | undefined;
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function show(next: number) {
+      current = (next + slides.length) % slides.length;
+      slides.forEach((s, i) => {
+        s.classList.toggle('active', i === current);
+        s.setAttribute('aria-hidden', i === current ? 'false' : 'true');
+      });
+      dots.forEach((d, i) => d.setAttribute('aria-selected', i === current ? 'true' : 'false'));
+    }
+
+    function stop() {
+      if (timer) window.clearInterval(timer);
+    }
+
+    function play() {
+      if (reduced) return;
+      stop();
+      timer = window.setInterval(() => show(current + 1), 6000);
+    }
+
+    box.querySelectorAll<HTMLElement>('.arrow').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        show(current + Number(btn.dataset.dir));
+        play();
+      });
+    });
+
+    dots.forEach((d) => {
+      d.addEventListener('click', () => {
+        show(Number(d.dataset.goto));
+        play();
+      });
+    });
+
+    box.addEventListener('mouseenter', stop);
+    box.addEventListener('mouseleave', play);
+    box.addEventListener('focusin', stop);
+
+    show(0);
+    play();
+  }
+
+  initBillboard();
+  document.addEventListener('astro:page-load', initBillboard);
+</script>
+
+<style>
+  .billboard {
+    position: relative;
+    min-height: 84vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    overflow: hidden;
+    background: var(--color-text);
+  }
+
+  .role {
+    position: absolute;
+    top: var(--space-4);
+    left: var(--space-4);
+    right: var(--space-4);
+    z-index: 3;
+    color: #fff;
+    font-size: var(--text-meta);
+    font-weight: var(--weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    max-width: 38ch;
+    text-shadow: 0 1px 12px rgb(0 0 0 / 0.5);
+  }
+
+  .stage {
+    position: absolute;
+    inset: 0;
+  }
+
+  .slide {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.7s ease;
+    display: flex;
+    align-items: flex-end;
+  }
+
+  .slide.active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .slide :global(.bg) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .content {
+    position: relative;
+    width: 100%;
+    padding: var(--space-8) var(--space-4) var(--space-12);
+    background: linear-gradient(to top, rgb(20 20 20 / 0.82), rgb(20 20 20 / 0.25) 55%, transparent);
+    color: #fff;
+  }
+
+  .eyebrow {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    font-size: var(--text-meta);
+    font-weight: var(--weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    margin-bottom: var(--space-2);
+  }
+
+  .count {
+    color: var(--color-accent);
+    font-variant-numeric: tabular-nums;
+  }
+
+  h1 {
+    font-size: var(--text-display-small);
+    font-weight: var(--weight-bold);
+    line-height: 1.04;
+    letter-spacing: -0.015em;
+    max-width: 18ch;
+    text-shadow: 0 2px 30px rgb(0 0 0 / 0.4);
+  }
+
+  .sub {
+    margin-top: var(--space-2);
+    font-size: var(--text-h3);
+    font-weight: var(--weight-light);
+    max-width: 46ch;
+  }
+
+  .cta {
+    display: inline-block;
+    margin-top: var(--space-4);
+    font-weight: var(--weight-bold);
+    background: var(--color-accent);
+    color: var(--color-text);
+    border-radius: 999px;
+    padding: 0.75rem 1.5rem;
+    transition: transform 0.2s;
+  }
+
+  .cta:hover {
+    transform: translateY(-2px);
+  }
+
+  .controls {
+    position: absolute;
+    right: var(--space-4);
+    bottom: var(--space-4);
+    z-index: 3;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+  }
+
+  .arrow {
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    border: 1px solid rgb(255 255 255 / 0.55);
+    background: rgb(20 20 20 / 0.35);
+    color: #fff;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+  }
+
+  .arrow:hover,
+  .arrow:focus-visible {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-text);
+  }
+
+  .dots {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .dot {
+    width: 0.6rem;
+    height: 0.6rem;
+    padding: 0;
+    border-radius: 50%;
+    border: 1px solid rgb(255 255 255 / 0.7);
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .dot[aria-selected='true'] {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+
+  @media (max-width: 700px) {
+    .billboard {
+      min-height: 76vh;
+    }
+
+    .controls {
+      left: var(--space-4);
+      right: auto;
+    }
+
+    .content {
+      padding-bottom: var(--space-16);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .slide {
+      transition: none;
+    }
+  }
+</style>
