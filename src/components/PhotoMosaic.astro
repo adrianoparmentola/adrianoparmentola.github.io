@@ -1,0 +1,125 @@
+---
+// Mosaico asimmetrico delle foto personali. Nessuna griglia a celle uguali:
+// ogni foto prende colonne e righe in base alle sue proporzioni e alla sua
+// risoluzione (più pixel = più spazio, le verticali salgono, le orizzontali
+// si allargano). Sullo scroll le foto scorrono a velocità diverse.
+// Le foto arrivano da src/assets/personal/: basta aggiungerne una lì.
+import { Image } from 'astro:assets';
+import { getPersonalPhotos } from '../lib/personal';
+import { useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const COLS = 12;
+
+/**
+ * Colonne dalla forma e dalla definizione della foto; righe per mantenerne le
+ * proporzioni. Una riga vale mezza colonna, così `righe ≈ colonne·2/ratio`.
+ */
+function spanFor(img: ImageMetadata) {
+  const ratio = img.width / img.height;
+  const mp = (img.width * img.height) / 1e6;
+  let cols = ratio >= 1.6 ? 6 : ratio >= 1.2 ? (mp > 2.3 ? 6 : 5) : ratio >= 0.6 ? 4 : 3;
+  if (mp < 1.6) cols -= 1; // poca definizione: non la si ingrandisce
+  cols = Math.max(3, Math.min(COLS, cols));
+  const rows = Math.max(3, Math.round((cols * 2) / ratio));
+  return { cols, rows };
+}
+
+// velocità di parallasse alternate: le foto non scorrono tutte insieme.
+// Restano piccole (spostamento < metà dello spazio tra le foto): più veloci
+// e le foto si accavallano.
+const SPEEDS = [0.035, -0.025, 0.05, -0.015, 0.04, -0.035, 0.02, 0.05, -0.03];
+
+const photos = getPersonalPhotos().map((img, i) => ({
+  img,
+  ...spanFor(img),
+  speed: SPEEDS[i % SPEEDS.length],
+}));
+---
+
+{
+  photos.length > 0 && (
+    <section class="mosaic" id="istantanee" data-chapter={t('photos.chapter')}>
+      <div class="grid">
+        {photos.map((p) => (
+          <figure
+            class="tile"
+            style={`--c:${p.cols};--r:${p.rows}`}
+            data-speed={p.speed}
+          >
+            <Image
+              src={p.img}
+              alt=""
+              widths={[400, 800, 1200]}
+              sizes={`(max-width: 700px) 50vw, ${Math.round((p.cols / COLS) * 100)}vw`}
+              loading="lazy"
+            />
+          </figure>
+        ))}
+      </div>
+    </section>
+  )
+}
+
+<style>
+  .mosaic {
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: var(--space-8) var(--space-4);
+    /* larghezza di una colonna: le righe valgono metà */
+    --gap: clamp(12px, 2.4vw, 36px);
+    --col: calc((min(100vw - 2 * var(--space-4), var(--content-max-width) - 2 * var(--space-4)) - 11 * var(--gap)) / 12);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    grid-auto-rows: calc(var(--col) / 2);
+    grid-auto-flow: dense;
+    gap: var(--gap);
+  }
+
+  .tile {
+    margin: 0;
+    grid-column: span var(--c);
+    grid-row: span var(--r);
+    overflow: hidden;
+    background: var(--color-border);
+    will-change: transform;
+  }
+
+  .tile :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.8s cubic-bezier(0.2, 0.6, 0.2, 1);
+  }
+
+  .tile:hover :global(img) {
+    transform: scale(1.04);
+  }
+
+  @media (max-width: 700px) {
+    .grid {
+      grid-template-columns: repeat(6, 1fr);
+      grid-auto-rows: calc((100vw - 2 * var(--space-4) - 5 * var(--gap)) / 12);
+    }
+
+    .tile {
+      grid-column: span min(var(--c), 6);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .tile :global(img) {
+      transition: none;
+    }
+  }
+</style>

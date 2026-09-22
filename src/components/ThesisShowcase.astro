@@ -1,0 +1,212 @@
+---
+// La tesi (Hum.us) come capitolo a sé: fondo scuro, titolo a lettere, una
+// frase che si accende parola per parola sullo scroll, e un carosello
+// continuo di video e immagini del progetto. Sostituisce la vecchia striscia
+// delle tecniche (Six Sigma, QFD...): qui si vedono le cose, non i nomi.
+import { Image } from 'astro:assets';
+import SplitTitle from './SplitTitle.astro';
+import { getProjectAsset } from '../lib/images';
+import { getProjectCopy } from '../lib/content';
+import { useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+const copy = await getProjectCopy('humus', lang);
+
+type Item =
+  | { kind: 'video'; src: string; ratio: number }
+  | { kind: 'image'; img: ImageMetadata; ratio: number };
+
+// ordine alternato: video, immagine larga, verticale... il ritmo del nastro
+const SOURCES: ({ video: string; ratio: number } | { image: string })[] = [
+  { video: '/videos/humus-bar-720.mp4', ratio: 16 / 9 },
+  { image: 'boxes-showcase.webp' },
+  { video: '/videos/humus-catering.mp4', ratio: 608 / 1080 },
+  { image: 'all-plates.webp' },
+  { image: 'bags-and-boxes.webp' },
+  { image: 'plate-red.webp' },
+  { image: 'box-top.webp' },
+  { image: 'voucher-mockup.webp' },
+  { image: 'box-side.webp' },
+];
+
+const items: Item[] = SOURCES.flatMap((s): Item[] => {
+  if ('video' in s) return [{ kind: 'video', src: s.video, ratio: s.ratio }];
+  const img = getProjectAsset('humus', s.image);
+  return img ? [{ kind: 'image', img, ratio: img.width / img.height }] : [];
+});
+---
+
+<section class="thesis" id="tesi" data-chapter={t('thesis.chapter')}>
+  <SplitTitle text={t('thesis.chapter')} tone="dark" />
+
+  <div class="head">
+    <p class="eyebrow">{t('thesis.eyebrow')}</p>
+    <h3>{copy?.data.title ?? 'Hum.us'}</h3>
+    {copy?.data.dek && <p class="fill" data-fill>{copy.data.dek}</p>}
+    <a class="cta" href={`/${lang}/projects/humus/`}>{t('featured.cta')} →</a>
+  </div>
+
+  <div class="reel">
+    <div class="track">
+      {
+        [0, 1].map((copyIndex) =>
+          items.map((it) => (
+            <figure class="slide" style={`--ratio:${it.ratio}`} aria-hidden={copyIndex === 1 ? 'true' : undefined}>
+              {it.kind === 'video' ? (
+                <video src={it.src} muted loop playsinline preload="none" data-autoplay />
+              ) : (
+                <Image
+                  src={it.img}
+                  alt={copyIndex === 0 ? 'Hum.us' : ''}
+                  widths={[480, 900, 1400]}
+                  sizes="60vw"
+                  loading="lazy"
+                />
+              )}
+            </figure>
+          ))
+        )
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .thesis {
+    background: var(--color-text);
+    color: var(--color-bg);
+    padding: var(--space-10, 5rem) 0 var(--space-8);
+    overflow: hidden;
+  }
+
+  .head {
+    max-width: var(--content-max-width);
+    margin: var(--space-6) auto var(--space-6);
+    padding: 0 var(--space-4);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    column-gap: var(--space-6);
+    align-items: end;
+  }
+
+  .eyebrow {
+    grid-column: 1 / -1;
+    font-size: var(--text-meta);
+    font-weight: var(--weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--color-accent);
+    margin-bottom: var(--space-2);
+  }
+
+  h3 {
+    font-size: var(--text-h1);
+    font-weight: var(--weight-bold);
+    letter-spacing: -0.03em;
+    line-height: 0.95;
+  }
+
+  .fill {
+    font-size: var(--text-h3);
+    font-weight: var(--weight-bold);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+
+  /* parola per parola, dal grigio al bianco (gestito da scrollfx.ts) */
+  .fill :global(.fw) {
+    transition: color 0.3s ease;
+  }
+
+  :global(.fx-on) .fill :global(.fw) {
+    color: rgb(246 245 241 / 0.25);
+  }
+
+  :global(.fx-on) .fill :global(.fw.on) {
+    color: var(--color-bg);
+  }
+
+  .cta {
+    grid-column: 2;
+    justify-self: start;
+    margin-top: var(--space-3);
+    font-weight: var(--weight-bold);
+    background: var(--color-accent);
+    color: var(--color-text);
+    border-radius: 999px;
+    padding: 0.75rem 1.5rem;
+    transition: transform 0.2s;
+  }
+
+  .cta:hover {
+    transform: translateY(-2px);
+  }
+
+  /* ---------- nastro continuo ---------- */
+  .reel {
+    --h: clamp(220px, 44vh, 480px);
+    overflow: hidden;
+  }
+
+  .track {
+    display: flex;
+    gap: var(--space-2);
+    width: max-content;
+    animation: reel 70s linear infinite;
+  }
+
+  .reel:hover .track {
+    animation-play-state: paused;
+  }
+
+  @keyframes reel {
+    to {
+      /* metà esatta: la seconda copia prende il posto della prima */
+      transform: translateX(calc(-50% - var(--space-2) / 2));
+    }
+  }
+
+  .slide {
+    margin: 0;
+    height: var(--h);
+    width: calc(var(--h) * var(--ratio));
+    flex: none;
+    overflow: hidden;
+    border-radius: 6px;
+    background: #222;
+  }
+
+  .slide video,
+  .slide :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  @media (max-width: 800px) {
+    .head {
+      grid-template-columns: 1fr;
+      row-gap: var(--space-2);
+    }
+
+    .cta {
+      grid-column: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .track {
+      animation: none;
+    }
+
+    .reel {
+      overflow-x: auto;
+    }
+  }
+</style>

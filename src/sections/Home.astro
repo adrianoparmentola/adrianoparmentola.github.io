@@ -1,17 +1,19 @@
 ---
-// Home a storytelling verticale: dopo gli user test l'obiettivo è invitare
-// esplicitamente ad approfondire (pulsanti visibili + narrazione a capitoli).
-// Flusso: hero (ruolo leggibile) → 3 capitoli-categoria con descrizione e
-// pulsante → caso studio in evidenza → marquee → referenze & background → CTA.
+// Home a capitoli, pensata per dire chi sono con poche parole: dati, foto,
+// progetti. Lo scroll guida il racconto (reference: olhalazarieva.com).
+// Flusso: billboard progetti → 01 chi sono (tabella che crolla) → 02 foto
+// → 03 tesi (Hum.us, video a nastro) → 04 progetti → 05 referenze.
+// Un indice fisso "01 / 05" segue i capitoli. Animazioni: scripts/scrollfx.ts
 import { Image } from 'astro:assets';
 import TestimonialCard from '../components/TestimonialCard.astro';
 import ModelViewer from '../components/ModelViewer.astro';
-import Marquee from '../components/Marquee.astro';
 import HeroBillboard from '../components/HeroBillboard.astro';
-import PersonalBlock from '../components/PersonalBlock.astro';
+import SplitTitle from '../components/SplitTitle.astro';
+import IdentityTable from '../components/IdentityTable.astro';
+import PhotoMosaic from '../components/PhotoMosaic.astro';
+import ThesisShowcase from '../components/ThesisShowcase.astro';
 import { getCollection } from 'astro:content';
 import { getProjectAsset } from '../lib/images';
-import { getProjectCopy } from '../lib/content';
 import { profile } from '../lib/profile';
 import { useTranslations, type Lang } from '../i18n/ui';
 
@@ -30,12 +32,6 @@ const CATEGORIES = [
   { key: 'prodotti', image: getProjectAsset('cartesio', 'hero.webp') },
   { key: 'spazi', image: getProjectAsset('talea', 'hero.webp') },
 ] as const;
-
-// Caso studio in evidenza: Hum.us
-const featuredImage = getProjectAsset('humus', 'boxes-showcase.webp');
-const featuredCopy = await getProjectCopy('humus', lang);
-
-const MARQUEE_ITEMS = ['Six Sigma', 'DMAIC', 'QFD', 'Kano', 'TRIZ', 'Service Design', 'VRED', 'Blender'];
 ---
 
 <HeroBillboard lang={lang} />
@@ -46,7 +42,20 @@ const MARQUEE_ITEMS = ['Six Sigma', 'DMAIC', 'QFD', 'Kano', 'TRIZ', 'Service Des
   <span class="scroll-hint">{t('home.scroll')} ↓</span>
 </section>
 
-<section class="chapters">
+<div class="chapter-index" aria-hidden="true">
+  <span class="ci-count"><span class="ci-num">01</span> / <span class="ci-tot">05</span></span>
+  <span class="ci-name"></span>
+</div>
+
+<SplitTitle text={t('id.chapter')} />
+<IdentityTable lang={lang} />
+
+<PhotoMosaic lang={lang} />
+
+<ThesisShowcase lang={lang} />
+
+<section class="chapters" data-chapter={t('chapter.work')}>
+  <SplitTitle text={t('chapter.work')} />
   <h2 class="chapters-title reveal">{t('home.chapters')}</h2>
   <div class="chapter-list">
     {
@@ -69,27 +78,7 @@ const MARQUEE_ITEMS = ['Six Sigma', 'DMAIC', 'QFD', 'Kano', 'TRIZ', 'Service Des
   </div>
 </section>
 
-<section class="featured reveal">
-  <a class="featured-inner" href={`/${lang}/projects/humus/`}>
-    <div class="featured-media">
-      {featuredImage && (
-        <Image src={featuredImage} alt="Hum.us" widths={[640, 1200, 1800]} sizes="(max-width: 900px) 100vw, 60vw" />
-      )}
-    </div>
-    <div class="featured-text">
-      <p class="eyebrow">{t('featured.eyebrow')}</p>
-      <h2>{featuredCopy?.data.title ?? 'Hum.us'}</h2>
-      <p class="lead">{t('featured.line')}</p>
-      <span class="cta primary">{t('featured.cta')} →</span>
-    </div>
-  </a>
-</section>
-
-<Marquee items={MARQUEE_ITEMS} />
-
-<PersonalBlock lang={lang} />
-
-<section class="background" id="background">
+<section class="background" id="background" data-chapter={t('chapter.refs')}>
   <h2 class="reveal">{t('background.title')}</h2>
 
   <div class="testimonial-grid">
@@ -143,6 +132,12 @@ const MARQUEE_ITEMS = ['Six Sigma', 'DMAIC', 'QFD', 'Kano', 'TRIZ', 'Service Des
   <a class="cta primary" href={`/${lang}/contact/`}>{t('nav.contact')} →</a>
 </section>
 
+<script>
+  import { initScrollFx } from '../scripts/scrollfx';
+  initScrollFx();
+  document.addEventListener('astro:page-load', initScrollFx);
+</script>
+
 <style>
   /* ---------- Riga azioni sotto il billboard ---------- */
   .hero-actions {
@@ -190,11 +185,64 @@ const MARQUEE_ITEMS = ['Six Sigma', 'DMAIC', 'QFD', 'Kano', 'TRIZ', 'Service Des
     margin-left: auto;
   }
 
+  /* ---------- Indice di capitolo fisso ----------
+     Segue lo scroll: "01 / 05 — Chi sono". In difference si legge sia sul
+     chiaro sia sul fondo scuro della tesi. */
+  .chapter-index {
+    position: fixed;
+    left: var(--space-4);
+    bottom: var(--space-4);
+    z-index: 40;
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    color: #fff;
+    mix-blend-mode: difference;
+    font-weight: var(--weight-bold);
+    pointer-events: none;
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.35s, transform 0.35s;
+  }
+
+  .chapter-index:global(.show) {
+    opacity: 1;
+    transform: none;
+  }
+
+  .ci-count {
+    font-size: var(--text-h3);
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .ci-name {
+    font-size: var(--text-meta);
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+  }
+
+  .chapter-index:global(.swap) .ci-num {
+    display: inline-block;
+    animation: ci-swap 0.4s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  @keyframes ci-swap {
+    from {
+      transform: translateY(60%);
+      opacity: 0;
+    }
+  }
+
   /* ---------- Capitoli / categorie ---------- */
   .chapters {
     max-width: var(--content-max-width);
     margin: 0 auto;
-    padding: var(--space-8) var(--space-4) var(--space-6);
+    padding: var(--space-12) var(--space-4) var(--space-6);
+  }
+
+  .chapters :global(.split-title) {
+    margin-bottom: var(--space-6);
   }
 
   .chapters-title {
@@ -285,67 +333,6 @@ const MARQUEE_ITEMS = ['Six Sigma', 'DMAIC', 'QFD', 'Kano', 'TRIZ', 'Service Des
   .chapter:hover .pill {
     background: var(--color-accent);
     color: var(--color-text);
-  }
-
-  /* ---------- Caso studio in evidenza ---------- */
-  .featured {
-    max-width: var(--content-max-width);
-    margin: 0 auto;
-    padding: var(--space-6) var(--space-4);
-  }
-
-  .featured-inner {
-    display: grid;
-    grid-template-columns: 7fr 5fr;
-    gap: var(--space-4);
-    align-items: center;
-    color: var(--color-text);
-    background: color-mix(in srgb, var(--color-accent) 10%, var(--color-bg));
-    border: 1px solid color-mix(in srgb, var(--color-accent) 40%, var(--color-bg));
-    border-radius: 16px;
-    overflow: hidden;
-  }
-
-  .featured-media {
-    aspect-ratio: 16 / 11;
-    overflow: hidden;
-  }
-
-  .featured-media :global(img) {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.6s cubic-bezier(0.2, 0.6, 0.2, 1);
-  }
-
-  .featured-inner:hover .featured-media :global(img) {
-    transform: scale(1.03);
-  }
-
-  .featured-text {
-    padding: var(--space-4) var(--space-4) var(--space-4) 0;
-  }
-
-  .featured-text .eyebrow {
-    color: var(--color-text-muted);
-    margin-bottom: var(--space-1);
-  }
-
-  .featured-text h2 {
-    font-size: var(--text-h1);
-    letter-spacing: -0.02em;
-    line-height: 1;
-  }
-
-  .featured-text .lead {
-    margin: var(--space-2) 0 var(--space-3);
-    color: var(--color-text-muted);
-    font-size: var(--text-h3);
-    font-weight: var(--weight-light);
-  }
-
-  .featured-text .cta {
-    display: inline-block;
   }
 
   /* ---------- Referenze & background ---------- */
@@ -445,13 +432,6 @@ const MARQUEE_ITEMS = ['Six Sigma', 'DMAIC', 'QFD', 'Kano', 'TRIZ', 'Service Des
       grid-template-columns: 1fr;
     }
 
-    .featured-inner {
-      grid-template-columns: 1fr;
-    }
-
-    .featured-text {
-      padding: 0 var(--space-4) var(--space-4);
-    }
 
     .testimonial-grid {
       grid-template-columns: 1fr;
@@ -465,7 +445,6 @@ const MARQUEE_ITEMS = ['Six Sigma', 'DMAIC', 'QFD', 'Kano', 'TRIZ', 'Service Des
   @media (prefers-reduced-motion: reduce) {
     .chapter,
     .chapter-media :global(img),
-    .featured-media :global(img),
     .cta.primary,
     .scroll-hint {
       transition: none;

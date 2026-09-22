@@ -1,0 +1,51 @@
+---
+// Titolo di sezione gigante, lettera per lettera: sullo scroll ogni lettera
+// risale dal basso con un piccolo ritardo e una rotazione, e si ricompone
+// (effetto "ABOUT ME" della reference). L'animazione è scrubbata: tornando
+// su, le lettere ricadono. Il movimento vive in src/scripts/scrollfx.ts.
+interface Props {
+  text: string;
+  tone?: 'light' | 'dark';
+}
+
+const { text, tone = 'light' } = Astro.props;
+const chars = [...text];
+---
+
+<h2 class:list={['split-title', tone]} aria-label={text}>
+  <span class="line" aria-hidden="true">
+    {chars.map((c, i) => <span class="st-ch" style={`--i:${i}`}>{c === ' ' ? ' ' : c}</span>)}
+  </span>
+</h2>
+
+<style>
+  .split-title {
+    margin: 0;
+    padding: 0 var(--space-2);
+    text-align: center;
+    font-size: clamp(3.5rem, 1rem + 13vw, 15rem);
+    font-weight: var(--weight-bold);
+    line-height: 0.82;
+    letter-spacing: -0.055em;
+    text-transform: uppercase;
+    color: var(--color-text);
+    /* le lettere entrano da sotto la linea: quel che sta sotto non si vede */
+    overflow: hidden;
+    padding-bottom: 0.04em;
+  }
+
+  .split-title.dark {
+    color: var(--color-bg);
+  }
+
+  .line {
+    display: inline-block;
+    white-space: nowrap;
+  }
+
+  .st-ch {
+    display: inline-block;
+    will-change: transform;
+    transform-origin: 50% 100%;
+  }
+</style>

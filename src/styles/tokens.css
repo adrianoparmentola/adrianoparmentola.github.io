@@ -80,8 +80,11 @@ body {
   margin: 0;
   padding: 0;
   /* le bande full-bleed (100vw) non devono generare scroll orizzontale
-     quando è presente la scrollbar verticale */
+     quando è presente la scrollbar verticale. `clip` dopo `hidden`:
+     hidden fa di body un contenitore di scroll e rompe position: sticky
+     (la tabella "chi sono" in home); hidden resta per i browser vecchi */
   overflow-x: hidden;
+  overflow-x: clip;
 }
 
 body {

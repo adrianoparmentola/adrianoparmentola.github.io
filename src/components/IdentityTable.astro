@@ -1,0 +1,236 @@
+---
+// "Chi sono" senza paragrafi: una tabella di dati. Sullo scroll il testo si
+// riempie dal grigio al nero, poi la tabella si rompe — lettere e filetti si
+// staccano, ruotano e crollano sul fondo (reference: olhalazarieva.com).
+// La sezione è alta 300vh con uno stage sticky: lo scroll guida l'animazione.
+// Il movimento vive in src/scripts/scrollfx.ts; senza JS o con
+// prefers-reduced-motion resta una tabella statica, leggibile.
+import { Image } from 'astro:assets';
+import volto from '../assets/portrait/volto.webp';
+import { useTranslations, type Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const t = useTranslations(lang);
+
+const ROWS: { label: string; value: string[] }[] = [
+  { label: t('id.name'), value: ['Adriano'] },
+  { label: t('id.surname'), value: ['Parmentola'] },
+  { label: t('id.born'), value: ['Campobasso'] },
+  { label: t('id.sport'), value: ['Rugby'] },
+  { label: t('id.interests'), value: [t('id.v.interests')] },
+  { label: t('id.studies'), value: ['Industrial Product Design', 'Advanced Service Design'] },
+  { label: t('id.lives'), value: [t('id.v.lives')] },
+  { label: t('id.aim'), value: ['Event specialist'] },
+];
+
+// ogni filetto di riga è spezzato in segmenti: crollano come pezzi separati
+const SEGMENTS = 4;
+---
+
+<section class="identity" id="chi-sono" data-chapter={t('id.chapter')}>
+  <div class="stage">
+    <figure class="portrait">
+      <Image
+        src={volto}
+        alt="Adriano Parmentola"
+        widths={[360, 640, 960]}
+        sizes="(max-width: 700px) 38vw, 24vw"
+        loading="lazy"
+      />
+    </figure>
+
+    <div class="id-table" role="table" aria-label={t('id.chapter')}>
+      {
+        ROWS.map((r, i) => (
+          <div class="id-row" role="row" data-row={i}>
+            <span class="rule" aria-hidden="true">
+              {Array.from({ length: SEGMENTS }, () => (
+                <i class="seg" />
+              ))}
+            </span>
+            <span class="id-label" role="rowheader">
+              <span class="sr-only">{r.label}</span>
+              <span class="fx" aria-hidden="true">{r.label}</span>
+            </span>
+            <span class="id-value" role="cell">
+              <span class="sr-only">{r.value.join(', ')}</span>
+              {r.value.map((v) => (
+                <span class="fx vline" aria-hidden="true">{v}</span>
+              ))}
+            </span>
+          </div>
+        ))
+      }
+      <span class="rule end" aria-hidden="true" data-row={ROWS.length}>
+        {Array.from({ length: SEGMENTS }, () => (
+          <i class="seg" />
+        ))}
+      </span>
+    </div>
+  </div>
+</section>
+
+<style>
+  .identity {
+    position: relative;
+    background: var(--color-bg);
+  }
+
+  .stage {
+    position: relative;
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: var(--space-6) var(--space-4) var(--space-4);
+    display: grid;
+    grid-template-columns: 1fr clamp(150px, 24vw, 360px);
+    grid-template-areas: 'table portrait';
+    column-gap: var(--space-6);
+    align-items: start;
+    /* le righe della griglia non si allungano a riempire lo schermo */
+    align-content: start;
+  }
+
+  /* Con JS la sezione diventa alta e lo stage resta fermo mentre si scorre */
+  :global(.fx-on) .identity {
+    height: 300vh;
+  }
+
+  :global(.fx-on) .identity .stage {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    height: 100svh;
+    padding-top: calc(var(--space-8) + 1rem);
+    overflow: hidden;
+  }
+
+  /* slot quadrato in alto a destra */
+  .portrait {
+    grid-area: portrait;
+    margin: 0;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background: var(--color-border);
+  }
+
+  .portrait :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 38%;
+    display: block;
+  }
+
+  .id-table {
+    grid-area: table;
+    position: relative;
+    z-index: 1;
+  }
+
+  .id-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: clamp(6rem, 4rem + 6vw, 11rem) 1fr;
+    align-items: baseline;
+    gap: var(--space-2);
+    padding: 0.5em 0 0.45em;
+    font-size: clamp(1.35rem, 0.7rem + 2.6vw, 3.4rem);
+  }
+
+  .rule {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 0;
+    display: flex;
+  }
+
+  /* filetto di chiusura sotto l'ultima riga */
+  .rule.end {
+    position: relative;
+  }
+
+  .seg {
+    flex: 1;
+    height: 1px;
+    background: var(--color-text);
+    will-change: transform;
+  }
+
+  .id-label {
+    font-size: var(--text-meta);
+    font-weight: var(--weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    align-self: center;
+  }
+
+  .id-value {
+    display: flex;
+    flex-direction: column;
+    font-weight: var(--weight-bold);
+    line-height: 1.02;
+    letter-spacing: -0.02em;
+  }
+
+  /* lettere generate da scrollfx.ts */
+  .identity :global(.w) {
+    display: inline-block;
+    white-space: nowrap;
+  }
+
+  .identity :global(.ch) {
+    display: inline-block;
+    will-change: transform;
+    transition: color 0.25s ease;
+  }
+
+  /* con JS il testo parte grigio e si riempie di nero sullo scroll */
+  :global(.fx-on) .identity :global(.ch) {
+    color: #bdbab2;
+  }
+
+  :global(.fx-on) .identity :global(.ch.on) {
+    color: var(--color-text);
+  }
+
+  /* cadendo, alcune lettere tornano grigie come nella reference */
+  :global(.fx-on) .identity :global(.ch.on.dim) {
+    color: #a9a69e;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  @media (max-width: 700px) {
+    .stage {
+      grid-template-columns: 1fr;
+      grid-template-areas: 'portrait' 'table';
+      row-gap: var(--space-3);
+    }
+
+    .portrait {
+      width: 38vw;
+      justify-self: end;
+    }
+
+    :global(.fx-on) .identity .stage {
+      padding-top: calc(var(--space-6) + 1rem);
+    }
+
+    .id-row {
+      grid-template-columns: 5.5rem 1fr;
+      font-size: clamp(1.2rem, 0.9rem + 2vw, 1.8rem);
+    }
+  }
+</style>
