@@ -1,4 +1,9 @@
 ---
+// Scheda referenza: chi parla (foto profilo, nome, ruolo), cosa dice, il
+// collegamento al profilo LinkedIn da cui arriva.
+// Foto: src/assets/testimonials/<id>.(jpg|png|webp), con lo stesso nome del
+// file json (es. andrea-lolliri.jpg). Finché manca, un monogramma.
+import { Image } from 'astro:assets';
 import type { CollectionEntry } from 'astro:content';
 
 interface Props {
@@ -7,55 +12,146 @@ interface Props {
 
 const { testimonial } = Astro.props;
 const { name, role, linkedin, quote, rating } = testimonial.data;
+
+const avatars = import.meta.glob<{ default: ImageMetadata }>('/src/assets/testimonials/*.{jpg,jpeg,png,webp}', {
+  eager: true,
+});
+const avatarKey = Object.keys(avatars).find((k) => k.split('/').pop()!.replace(/\.[^.]+$/, '') === testimonial.id);
+const avatar = avatarKey ? avatars[avatarKey]!.default : undefined;
+
+const initials = name
+  .split(/\s+/)
+  .filter((w) => /^[A-Za-zÀ-ÿ]/.test(w) && !/\.$/.test(w))
+  .map((w) => w[0])
+  .slice(0, 2)
+  .join('');
 ---
 
 <a class="testimonial-card" href={linkedin} target="_blank" rel="noopener noreferrer">
-  <div class="head">
-    <span class="name">{name}</span>
-    {rating && <span class="rating">{'★'.repeat(Math.round(rating))}</span>}
-  </div>
-  {role && <p class="role meta-tag">{role}</p>}
+  <span class="mark" aria-hidden="true">“</span>
   <p class="quote">{quote}</p>
+  <div class="who">
+    <span class="avatar" aria-hidden="true">
+      {avatar ? <Image src={avatar} alt="" width={96} height={96} /> : initials}
+    </span>
+    <span class="id">
+      <span class="name">{name}</span>
+      {role && <span class="role">{role}</span>}
+    </span>
+    <span class="in" aria-label="LinkedIn">in</span>
+  </div>
+  {rating && <span class="rating" aria-label={`${rating} / 5`}>{'★'.repeat(Math.round(rating))}</span>}
 </a>
 
 <style>
   .testimonial-card {
-    display: block;
-    padding: var(--space-3);
-    border: 1px solid var(--color-border);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    height: 100%;
+    padding: var(--space-4) var(--space-3) var(--space-3);
     border-radius: 1.25rem;
-    background: var(--color-bg);
-    transition: border-color 0.2s ease;
+    background: #fff;
+    color: var(--color-text);
+    box-shadow: 0 1px 0 rgb(20 20 20 / 0.04), 0 14px 34px rgb(20 20 20 / 0.07);
+    transition:
+      transform 0.35s cubic-bezier(0.3, 0.9, 0.3, 1),
+      box-shadow 0.35s;
   }
 
   .testimonial-card:hover {
-    border-color: var(--color-accent);
+    transform: translateY(-4px);
+    box-shadow: 0 1px 0 rgb(20 20 20 / 0.04), 0 22px 44px rgb(20 20 20 / 0.12);
     color: var(--color-text);
   }
 
-  .head {
+  .mark {
+    position: absolute;
+    top: 0.2rem;
+    right: 1.1rem;
+    font-size: 5rem;
+    line-height: 1;
+    font-weight: var(--weight-bold);
+    color: var(--color-accent);
+  }
+
+  .quote {
+    margin: 0;
+    flex: 1;
+    line-height: 1.55;
+  }
+
+  .who {
     display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: var(--space-2);
+    align-items: center;
+    gap: 0.8rem;
+    padding-top: var(--space-2);
+    border-top: 1px solid var(--color-border);
+  }
+
+  .avatar {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    overflow: hidden;
+    background: var(--color-text);
+    color: var(--color-accent);
+    font-weight: var(--weight-bold);
+    font-size: 0.95rem;
+    letter-spacing: 0.02em;
+  }
+
+  .avatar :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .id {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    flex: 1;
   }
 
   .name {
     font-weight: var(--weight-bold);
   }
 
-  .rating {
-    color: var(--color-accent);
-    font-size: var(--text-meta);
-    letter-spacing: 0.1em;
-  }
-
   .role {
-    margin: 0.25rem 0 var(--space-2);
+    font-size: var(--text-meta);
+    color: var(--color-text-muted);
   }
 
-  .quote {
-    margin: 0;
-    line-height: 1.5;
+  .in {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 1.6rem;
+    height: 1.6rem;
+    border-radius: 0.35rem;
+    background: #0a66c2;
+    color: #fff;
+    font-weight: var(--weight-bold);
+    font-size: 0.8rem;
+  }
+
+  .rating {
+    position: absolute;
+    top: var(--space-2);
+    left: var(--space-3);
+    font-size: 0.7rem;
+    letter-spacing: 0.15em;
+    color: var(--color-text);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .testimonial-card {
+      transition: none;
+    }
   }
 </style>

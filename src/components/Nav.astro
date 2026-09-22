@@ -1,4 +1,12 @@
 ---
+// Barra di navigazione: una pillola flottante, sempre gli stessi contenuti
+// (nome, sezioni, lingue) ma con movimento:
+//  - si compatta quando si scorre, sparisce scendendo e torna risalendo
+//  - un evidenziatore lime scivola sotto il link puntato / della pagina
+//  - il nome "rotola" lettera per lettera al passaggio del mouse
+//  - una linea lime sotto la pillola segna quanto si è letto della pagina
+// Niente elementi aggiunti: il dinamismo viene dal movimento, non dal numero
+// di cose sullo schermo.
 import { languages, useTranslations, type Lang } from '../i18n/ui';
 
 interface Props {
@@ -18,78 +26,319 @@ const links = [
 ];
 
 const currentPath = Astro.url.pathname.replace(new RegExp(`^/${lang}/`), '/');
+const isCurrent = (href: string) => {
+  const p = href.replace(new RegExp(`^/${lang}/`), '/');
+  return p === '/' ? currentPath === '/' : currentPath.startsWith(p);
+};
+
+const BRAND = 'Adriano Parmentola';
 ---
 
-<header class="site-nav">
-  <a class="brand" href={`/${lang}/`}>Adriano Parmentola</a>
-  <nav aria-label="Main">
-    <ul>
+<header class="site-nav" data-nav>
+  <div class="bar">
+    <a class="brand" href={`/${lang}/`} aria-label={BRAND}>
+      <span class="dot" aria-hidden="true"></span>
+      <span class="roll" aria-hidden="true">
+        {
+          [...BRAND].map((c, i) => (
+            <span class="rc" style={`--i:${i}`} data-c={c === ' ' ? ' ' : c}>
+              {c === ' ' ? ' ' : c}
+            </span>
+          ))
+        }
+      </span>
+    </a>
+
+    <nav aria-label="Main" class="links" data-glide>
+      <span class="glider" aria-hidden="true"></span>
       {
         links.map((link) => (
-          <li>
-            <a href={link.href}>{link.label}</a>
-          </li>
+          <a href={link.href} aria-current={isCurrent(link.href) ? 'page' : undefined}>
+            {link.label}
+          </a>
         ))
       }
-    </ul>
-  </nav>
-  <div class="lang-switch" aria-label="Language">
-    {
-      Object.keys(languages).map((code) => (
-        <a
-          href={`/${code}${currentPath}`}
-          aria-current={code === lang ? 'true' : undefined}
-        >
-          {code.toUpperCase()}
-        </a>
-      ))
-    }
+    </nav>
+
+    <div class="lang" aria-label="Language" data-glide>
+      <span class="glider" aria-hidden="true"></span>
+      {
+        Object.keys(languages).map((code) => (
+          <a href={`/${code}${currentPath}`} aria-current={code === lang ? 'true' : undefined} hreflang={code}>
+            {code.toUpperCase()}
+          </a>
+        ))
+      }
+    </div>
   </div>
+  <span class="progress" aria-hidden="true"></span>
 </header>
+
+<script>
+  function initNav() {
+    const nav = document.querySelector<HTMLElement>('[data-nav]');
+    if (!nav || nav.dataset.ready === '1') return;
+    nav.dataset.ready = '1';
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    // evidenziatore: si posa sul link attivo, segue il mouse, torna al posto
+    nav.querySelectorAll<HTMLElement>('[data-glide]').forEach((group) => {
+      const glider = group.querySelector<HTMLElement>('.glider')!;
+      const items = Array.from(group.querySelectorAll<HTMLElement>('a'));
+      const active = () => items.find((a) => a.hasAttribute('aria-current'));
+      const place = (a?: HTMLElement) => {
+        if (!a) {
+          glider.style.opacity = '0';
+          return;
+        }
+        glider.style.opacity = '1';
+        glider.style.width = `${a.offsetWidth}px`;
+        glider.style.transform = `translateX(${a.offsetLeft}px)`;
+      };
+      items.forEach((a) => {
+        a.addEventListener('mouseenter', () => place(a));
+        a.addEventListener('focus', () => place(a));
+      });
+      group.addEventListener('mouseleave', () => place(active()));
+      place(active());
+      document.fonts?.ready.then(() => place(active()));
+      window.addEventListener('resize', () => place(active()));
+    });
+
+    // scorrendo: compatta, nasconde in discesa, mostra in salita, progresso
+    let lastY = window.scrollY;
+    let queued = false;
+    const update = () => {
+      queued = false;
+      const y = window.scrollY;
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      nav.style.setProperty('--progress', String(max > 0 ? y / max : 0));
+      nav.classList.toggle('compact', y > 40);
+      if (!reduced) nav.classList.toggle('away', y > 240 && y > lastY + 2);
+      if (y < lastY - 2) nav.classList.remove('away');
+      lastY = y;
+    };
+    window.addEventListener(
+      'scroll',
+      () => {
+        if (!queued) {
+          queued = true;
+          requestAnimationFrame(update);
+        }
+      },
+      { passive: true }
+    );
+    // raggiungerla con la tastiera la fa sempre riapparire
+    nav.addEventListener('focusin', () => nav.classList.remove('away'));
+    update();
+  }
+
+  initNav();
+  document.addEventListener('astro:page-load', initNav);
+</script>
 
 <style>
   .site-nav {
+    position: sticky;
+    top: 0;
+    z-index: 60;
+    padding: var(--space-2) var(--space-4);
+    pointer-events: none;
+    transition: transform 0.45s cubic-bezier(0.2, 0.7, 0.2, 1);
+  }
+
+  .site-nav.away {
+    transform: translateY(-120%);
+  }
+
+  .bar {
+    pointer-events: auto;
+    max-width: var(--content-max-width);
+    margin: 0 auto;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: var(--space-4);
-    padding: var(--space-3) var(--space-4);
-    max-width: var(--content-max-width);
-    margin: 0 auto;
-    flex-wrap: wrap;
+    gap: var(--space-3);
+    padding: 0.55rem 0.55rem 0.55rem 1.1rem;
+    border-radius: 999px;
+    background: rgb(246 245 241 / 0.72);
+    backdrop-filter: blur(14px) saturate(1.4);
+    -webkit-backdrop-filter: blur(14px) saturate(1.4);
+    border: 1px solid rgb(20 20 20 / 0.08);
+    transition: padding 0.35s, background 0.35s, box-shadow 0.35s, max-width 0.45s;
   }
 
+  .compact .bar {
+    max-width: min(var(--content-max-width), 980px);
+    background: rgb(246 245 241 / 0.88);
+    box-shadow: 0 10px 30px rgb(20 20 20 / 0.08);
+    padding-block: 0.4rem;
+  }
+
+  /* ---------- nome ---------- */
   .brand {
-    font-weight: var(--weight-bold);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
     font-size: var(--text-meta);
+    font-weight: var(--weight-bold);
     text-transform: uppercase;
     letter-spacing: 0.08em;
+    color: var(--color-text);
+    white-space: nowrap;
   }
 
-  nav ul {
+  /* "disponibile": un punto lime che respira, l'unico richiamo continuo */
+  .dot {
+    width: 0.55rem;
+    height: 0.55rem;
+    border-radius: 50%;
+    background: var(--color-accent);
+    box-shadow: 0 0 0 0 rgb(198 255 61 / 0.7);
+    animation: breathe 2.6s ease-out infinite;
+  }
+
+  @keyframes breathe {
+    70% {
+      box-shadow: 0 0 0 0.55rem rgb(198 255 61 / 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgb(198 255 61 / 0);
+    }
+  }
+
+  .roll {
+    display: inline-flex;
+    overflow: hidden;
+    line-height: 1.2;
+  }
+
+  /* ogni lettera ha una copia sotto: al passaggio salgono in cascata */
+  .rc {
+    position: relative;
+    display: inline-block;
+    transition: transform 0.45s cubic-bezier(0.6, 0, 0.2, 1);
+    transition-delay: calc(var(--i) * 18ms);
+  }
+
+  .rc::after {
+    content: attr(data-c);
+    position: absolute;
+    left: 0;
+    top: 100%;
+  }
+
+  .brand:hover .rc,
+  .brand:focus-visible .rc {
+    transform: translateY(-100%);
+  }
+
+  /* ---------- link e lingue ---------- */
+  .links,
+  .lang {
+    position: relative;
     display: flex;
-    gap: var(--space-3);
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    flex-wrap: wrap;
+    align-items: center;
   }
 
-  nav a {
-    font-weight: var(--weight-bold);
+  .links a,
+  .lang a {
+    position: relative;
+    z-index: 1;
     font-size: var(--text-meta);
+    font-weight: var(--weight-bold);
     text-transform: uppercase;
     letter-spacing: 0.06em;
+    padding: 0.5rem 0.9rem;
+    border-radius: 999px;
+    color: var(--color-text);
+    white-space: nowrap;
   }
 
-  .lang-switch {
-    display: flex;
-    gap: var(--space-1);
-    font-size: var(--text-meta);
-    font-weight: var(--weight-bold);
+  .lang {
+    background: rgb(20 20 20 / 0.06);
+    border-radius: 999px;
+    padding: 0.2rem;
   }
 
-  .lang-switch a[aria-current='true'] {
-    color: var(--color-accent);
+  .lang a {
+    padding: 0.35rem 0.6rem;
+    transition: color 0.3s;
+  }
+
+  .glider {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    height: calc(100% - 0.2rem);
+    translate: 0 -50%;
+    border-radius: 999px;
+    background: var(--color-accent);
+    opacity: 0;
+    transition:
+      transform 0.4s cubic-bezier(0.3, 0.9, 0.3, 1),
+      width 0.4s cubic-bezier(0.3, 0.9, 0.3, 1),
+      opacity 0.2s;
+  }
+
+  .lang .glider {
+    background: var(--color-text);
+  }
+
+  .lang a[aria-current='true'] {
+    color: var(--color-bg);
+  }
+
+  /* ---------- avanzamento lettura ---------- */
+  .progress {
+    display: block;
+    max-width: min(var(--content-max-width), 980px);
+    margin: 0.35rem auto 0;
+    height: 2px;
+    border-radius: 2px;
+    background: var(--color-accent);
+    transform-origin: 0 50%;
+    transform: scaleX(var(--progress, 0));
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .compact .progress {
+    opacity: 1;
+  }
+
+  @media (max-width: 760px) {
+    .site-nav {
+      padding: var(--space-1) var(--space-2);
+    }
+
+    .bar {
+      flex-wrap: wrap;
+      border-radius: 1.4rem;
+      row-gap: 0.2rem;
+    }
+
+    .links {
+      order: 3;
+      width: 100%;
+      justify-content: space-between;
+    }
+
+    .links a {
+      padding: 0.45rem 0.6rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .site-nav,
+    .rc,
+    .glider,
+    .bar {
+      transition: none;
+    }
+
+    .dot {
+      animation: none;
+    }
   }
 </style>

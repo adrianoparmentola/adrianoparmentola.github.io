@@ -42,7 +42,9 @@ const items: Item[] = SOURCES.flatMap((s): Item[] => {
 ---
 
 <section class="thesis" id="tesi" data-chapter={t('thesis.chapter')}>
-  <SplitTitle text={t('thesis.chapter')} tone="dark" />
+  <div class="title-wrap">
+    <SplitTitle text={t('thesis.chapter')} tone="dark" size="md" />
+  </div>
 
   <div class="head">
     <p class="eyebrow">{t('thesis.eyebrow')}</p>
@@ -82,6 +84,12 @@ const items: Item[] = SOURCES.flatMap((s): Item[] => {
     color: var(--color-bg);
     padding: var(--space-10, 5rem) 0 var(--space-8);
     overflow: hidden;
+  }
+
+  .title-wrap {
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: 0 var(--space-4);
   }
 
   .head {

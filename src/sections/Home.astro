@@ -1,16 +1,16 @@
 ---
 // Home a capitoli, pensata per dire chi sono con poche parole: dati, foto,
 // progetti. Lo scroll guida il racconto (reference: olhalazarieva.com).
-// Flusso: billboard progetti → 01 chi sono (tabella che crolla) → 02 foto
-// → 03 tesi (Hum.us, video a nastro) → 04 progetti → 05 referenze.
-// Un indice fisso "01 / 05" segue i capitoli. Animazioni: scripts/scrollfx.ts
+// Flusso: billboard progetti → 01 profilo (nome e ruolo, tabella che si
+// rompe, menù 3D e CV) → 02 design for hospitality (la tesi) → 03 progetti
+// → 04 referenze. Un indice fisso "01 / 04" segue i capitoli.
+// Animazioni: scripts/scrollfx.ts
 import { Image } from 'astro:assets';
 import TestimonialCard from '../components/TestimonialCard.astro';
-import ModelViewer from '../components/ModelViewer.astro';
 import HeroBillboard from '../components/HeroBillboard.astro';
 import SplitTitle from '../components/SplitTitle.astro';
 import IdentityTable from '../components/IdentityTable.astro';
-import PhotoMosaic from '../components/PhotoMosaic.astro';
+import ResumeBlock from '../components/ResumeBlock.astro';
 import ThesisShowcase from '../components/ThesisShowcase.astro';
 import { getCollection } from 'astro:content';
 import { getProjectAsset } from '../lib/images';
@@ -36,27 +36,20 @@ const CATEGORIES = [
 
 <HeroBillboard lang={lang} />
 
-<section class="hero-actions">
-  <a class="cta primary" href={`/${lang}/projects/`}>{t('home.cta.projects')} →</a>
-  <a class="cta ghost dark" href={`/${lang}/contact/`}>{t('home.cta.contact')}</a>
-  <span class="scroll-hint">{t('home.scroll')} ↓</span>
-</section>
-
 <div class="chapter-index" aria-hidden="true">
-  <span class="ci-count"><span class="ci-num">01</span> / <span class="ci-tot">05</span></span>
+  <span class="ci-count"><span class="ci-num">01</span> / <span class="ci-tot">04</span></span>
   <span class="ci-name"></span>
 </div>
 
-<SplitTitle text={t('id.chapter')} />
-<IdentityTable lang={lang} />
-
-<PhotoMosaic lang={lang} />
+<div data-chapter={t('id.chapter')}>
+  <IdentityTable lang={lang} />
+  <ResumeBlock lang={lang} />
+</div>
 
 <ThesisShowcase lang={lang} />
 
 <section class="chapters" data-chapter={t('chapter.work')}>
-  <SplitTitle text={t('chapter.work')} />
-  <h2 class="chapters-title reveal">{t('home.chapters')}</h2>
+  <SplitTitle text={t('chapter.work')} size="md" />
   <div class="chapter-list">
     {
       CATEGORIES.map((cat, i) => (
@@ -79,6 +72,7 @@ const CATEGORIES = [
 </section>
 
 <section class="background" id="background" data-chapter={t('chapter.refs')}>
+  <div class="bg-inner">
   <h2 class="reveal">{t('background.title')}</h2>
 
   <div class="testimonial-grid">
@@ -89,41 +83,20 @@ const CATEGORIES = [
     ))}
   </div>
 
-  <div class="bg-grid">
-    <div class="menu-3d reveal">
-      <ModelViewer src="/models/home/menu.glb" alt={t('background.menu')} lang={lang} variant="hero" />
-      <p class="meta-tag">{t('background.menu')}</p>
-      <a class="cta small" href={profile.cvPath} download>{t('background.cv')} ↓</a>
+  <div class="facts">
+    <div class="fact-block reveal">
+      <h3>{t('background.languages')}</h3>
+      <ul>
+        {profile.languages.map((l) => <li>{l}</li>)}
+      </ul>
     </div>
-    <div class="facts reveal" style="--delay: 120ms">
-      <div class="fact-block">
-        <h3 class="meta-tag">{t('speed.title')}</h3>
-        <ul class="speed">
-          <li>
-            <strong>{t('speed.interiors')}</strong>
-            <span>{t('speed.interiors.desc')}</span>
-            <span class="days meta-tag">7 {t('speed.days')}</span>
-          </li>
-          <li>
-            <strong>{t('speed.identity')}</strong>
-            <span>{t('speed.identity.desc')}</span>
-            <span class="days meta-tag">12 {t('speed.days')}</span>
-          </li>
-        </ul>
-      </div>
-      <div class="fact-block">
-        <h3 class="meta-tag">{t('background.languages')}</h3>
-        <ul>
-          {profile.languages.map((l) => <li>{l}</li>)}
-        </ul>
-      </div>
-      <div class="fact-block">
-        <h3 class="meta-tag">{t('background.gallup')}</h3>
-        <ul>
-          {profile.gallupTop.map((g, i) => <li>{i + 1}. {g}</li>)}
-        </ul>
-      </div>
+    <div class="fact-block reveal" style="--delay: 100ms">
+      <h3>{t('background.gallup')}</h3>
+      <ol class="gallup">
+        {profile.gallupTop.map((g) => <li>{g}</li>)}
+      </ol>
     </div>
+  </div>
   </div>
 </section>
 
@@ -139,17 +112,6 @@ const CATEGORIES = [
 </script>
 
 <style>
-  /* ---------- Riga azioni sotto il billboard ---------- */
-  .hero-actions {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2) var(--space-3);
-    flex-wrap: wrap;
-    max-width: var(--content-max-width);
-    margin: 0 auto;
-    padding: var(--space-4);
-  }
-
   .cta {
     font-weight: var(--weight-bold);
     border: 1px solid currentColor;
@@ -175,14 +137,6 @@ const CATEGORIES = [
   .cta.ghost.dark:hover {
     background: var(--color-text);
     color: var(--color-bg);
-  }
-
-  .scroll-hint {
-    font-size: var(--text-meta);
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    color: var(--color-text-muted);
-    margin-left: auto;
   }
 
   /* ---------- Indice di capitolo fisso ----------
@@ -243,12 +197,6 @@ const CATEGORIES = [
 
   .chapters :global(.split-title) {
     margin-bottom: var(--space-6);
-  }
-
-  .chapters-title {
-    font-size: var(--text-h2);
-    letter-spacing: -0.01em;
-    margin-bottom: var(--space-4);
   }
 
   .chapter-list {
@@ -335,78 +283,89 @@ const CATEGORIES = [
     color: var(--color-text);
   }
 
-  /* ---------- Referenze & background ---------- */
+  /* ---------- Referenze & background ----------
+     Banda a tutta larghezza in lime tenue: la sezione più "umana" della
+     pagina non resta bianca e spoglia. Schede bianche sopra, dati su scuro. */
   section.background {
-    padding: var(--space-8) var(--space-4);
+    width: 100vw;
+    margin-left: 50%;
+    transform: translateX(-50vw);
+    background:
+      radial-gradient(60rem 30rem at 85% 0%, rgb(198 255 61 / 0.55), transparent 70%),
+      color-mix(in srgb, var(--color-accent) 26%, var(--color-bg));
+  }
+
+  .bg-inner {
     max-width: var(--content-max-width);
     margin: 0 auto;
+    padding: var(--space-12) var(--space-4);
   }
 
   .background h2 {
     font-size: var(--text-h2);
+    letter-spacing: -0.02em;
   }
 
   .testimonial-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: var(--space-3);
-    margin-top: var(--space-3);
-  }
-
-  .bg-grid {
-    display: grid;
-    grid-template-columns: 5fr 7fr;
-    gap: var(--space-6);
-    margin-top: var(--space-6);
-    align-items: start;
+    margin-top: var(--space-4);
+    padding-top: var(--space-2);
   }
 
   .facts {
     display: grid;
-    gap: var(--space-4);
-    background: color-mix(in srgb, var(--color-accent) 14%, var(--color-bg));
-    border: 1px solid color-mix(in srgb, var(--color-accent) 45%, var(--color-bg));
-    border-radius: 12px;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+  }
+
+  .fact-block {
     padding: var(--space-4);
+    border-radius: 1.25rem;
+    background: var(--color-text);
+    color: var(--color-bg);
   }
 
   .fact-block h3 {
-    border-bottom: 2px solid var(--color-accent);
-    padding-bottom: var(--space-1);
+    font-size: var(--text-meta);
+    font-weight: var(--weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--color-accent);
     margin-bottom: var(--space-2);
-    color: var(--color-text);
+  }
+
+  .fact-block ul,
+  .fact-block ol {
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 0.5rem;
   }
 
   .fact-block ul {
     list-style: none;
-    margin: 0;
-    padding: 0;
-    display: grid;
-    gap: 0.4rem;
   }
 
-  .speed li {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    gap: var(--space-2);
-    align-items: baseline;
+  .gallup {
+    list-style: none;
+    counter-reset: g;
   }
 
-  .speed .days {
-    background: var(--color-accent);
-    color: var(--color-text);
-    padding: 0.1rem 0.6rem;
-    border-radius: 999px;
-    white-space: nowrap;
+  .gallup li {
+    counter-increment: g;
+    font-size: var(--text-h3);
+    font-weight: var(--weight-bold);
   }
 
-  .cta.small {
-    display: inline-block;
-    margin-top: var(--space-2);
-    padding: 0.5rem 1.1rem;
-    background: var(--color-accent);
-    border-color: var(--color-accent);
-    color: var(--color-text);
+  .gallup li::before {
+    content: '0' counter(g);
+    font-size: var(--text-meta);
+    color: var(--color-accent);
+    margin-right: 0.8rem;
+    vertical-align: middle;
   }
 
   /* ---------- Contact band ---------- */
@@ -433,11 +392,8 @@ const CATEGORIES = [
     }
 
 
-    .testimonial-grid {
-      grid-template-columns: 1fr;
-    }
-
-    .bg-grid {
+    .testimonial-grid,
+    .facts {
       grid-template-columns: 1fr;
     }
   }
@@ -445,8 +401,7 @@ const CATEGORIES = [
   @media (prefers-reduced-motion: reduce) {
     .chapter,
     .chapter-media :global(img),
-    .cta.primary,
-    .scroll-hint {
+    .cta.primary {
       transition: none;
       animation: none;
     }

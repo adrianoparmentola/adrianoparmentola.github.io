@@ -1,0 +1,3 @@
+Foto profilo delle referenze.
+Nome file = nome del json in src/content/testimonials (es. andrea-lolliri.jpg).
+Quadrate, almeno 200x200. Finche manca, la scheda mostra le iniziali.

@@ -6,6 +6,7 @@
 // Il movimento vive in src/scripts/scrollfx.ts; senza JS o con
 // prefers-reduced-motion resta una tabella statica, leggibile.
 import { Image } from 'astro:assets';
+import SplitTitle from './SplitTitle.astro';
 import volto from '../assets/portrait/volto.webp';
 import { useTranslations, type Lang } from '../i18n/ui';
 
@@ -17,8 +18,6 @@ const { lang } = Astro.props;
 const t = useTranslations(lang);
 
 const ROWS: { label: string; value: string[] }[] = [
-  { label: t('id.name'), value: ['Adriano'] },
-  { label: t('id.surname'), value: ['Parmentola'] },
   { label: t('id.born'), value: ['Campobasso'] },
   { label: t('id.sport'), value: ['Rugby'] },
   { label: t('id.interests'), value: [t('id.v.interests')] },
@@ -31,7 +30,12 @@ const ROWS: { label: string; value: string[] }[] = [
 const SEGMENTS = 4;
 ---
 
-<section class="identity" id="chi-sono" data-chapter={t('id.chapter')}>
+<header class="intro">
+  <SplitTitle text="Adriano Parmentola" size="md" />
+  <p class="role" data-fill>{t('home.role')}</p>
+</header>
+
+<section class="identity" id="chi-sono" aria-label="Adriano Parmentola">
   <div class="stage">
     <figure class="portrait">
       <Image
@@ -75,6 +79,36 @@ const SEGMENTS = 4;
 </section>
 
 <style>
+  /* nome e ruolo: aprono il capitolo al posto del vecchio "Chi sono" */
+  .intro {
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: var(--space-12) var(--space-4) 0;
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .role {
+    max-width: 30ch;
+    font-size: var(--text-h3);
+    font-weight: var(--weight-bold);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+
+  /* il ruolo si accende parola per parola, dal grigio al nero */
+  .role :global(.fw) {
+    transition: color 0.3s ease;
+  }
+
+  :global(.fx-on) .role :global(.fw) {
+    color: #bdbab2;
+  }
+
+  :global(.fx-on) .role :global(.fw.on) {
+    color: var(--color-text);
+  }
+
   .identity {
     position: relative;
     background: var(--color-bg);
@@ -96,7 +130,7 @@ const SEGMENTS = 4;
 
   /* Con JS la sezione diventa alta e lo stage resta fermo mentre si scorre */
   :global(.fx-on) .identity {
-    height: 300vh;
+    height: 420vh;
   }
 
   :global(.fx-on) .identity .stage {
@@ -111,6 +145,8 @@ const SEGMENTS = 4;
   /* slot quadrato in alto a destra */
   .portrait {
     grid-area: portrait;
+    position: relative;
+    z-index: 2;
     margin: 0;
     aspect-ratio: 1 / 1;
     overflow: hidden;
@@ -138,7 +174,7 @@ const SEGMENTS = 4;
     align-items: baseline;
     gap: var(--space-2);
     padding: 0.5em 0 0.45em;
-    font-size: clamp(1.35rem, 0.7rem + 2.6vw, 3.4rem);
+    font-size: clamp(1.25rem, 0.75rem + 1.9vw, 2.6rem);
   }
 
   .rule {
@@ -173,7 +209,9 @@ const SEGMENTS = 4;
     display: flex;
     flex-direction: column;
     font-weight: var(--weight-bold);
-    line-height: 1.02;
+    /* le lettere sono inline-block alte ~1.09em: con meno interlinea le due
+       righe degli studi si toccherebbero già da ferme */
+    line-height: 1.12;
     letter-spacing: -0.02em;
   }
 

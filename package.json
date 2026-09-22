@@ -11,7 +11,8 @@
     "astro": "astro",
     "optimize-assets": "node scripts/optimize-assets.mjs",
     "extract-pdfs": "node scripts/extract-pdfs.mjs",
-    "compress-videos": "node scripts/compress-videos.mjs"
+    "compress-videos": "node scripts/compress-videos.mjs",
+    "pdf": "node pdf/build.mjs"
   },
   "dependencies": {
     "@google/model-viewer": "^4.0.0",

@@ -2,7 +2,8 @@
 // Un solo loop requestAnimationFrame, attivo solo quando si scorre.
 //
 //  - .split-title   lettere che risalgono e si ricompongono (scrub)
-//  - .identity      tabella: riempimento grigio→nero, poi crollo verso il basso
+//  - .identity      tabella: riempimento grigio→nero, poi si rompe e crolla
+//                   senza che i pezzi si tocchino mai
 //  - [data-fill]    frase che si accende parola per parola
 //  - .tile[data-speed]  parallasse del mosaico foto
 //  - [data-chapter] indice di capitolo fisso "01 / 05 — Chi sono"
@@ -13,6 +14,7 @@
 
 const clamp = (v: number, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 const easeOut = (t: number) => 1 - Math.pow(1 - t, 3);
+const easeInOut = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
 
 /** PRNG deterministico: il crollo è uguale a ogni visita e a ogni resize. */
 function rng(seed: number) {
@@ -91,41 +93,155 @@ function identity(): Updater[] {
   const sec = document.querySelector<HTMLElement>('.identity');
   if (!sec) return [];
   const stage = sec.querySelector<HTMLElement>('.stage')!;
+  const portrait = sec.querySelector<HTMLElement>('.portrait');
   sec.querySelectorAll<HTMLElement>('.fx').forEach(splitLetters);
 
   const letters = Array.from(sec.querySelectorAll<HTMLElement>('.ch'));
   const pieces = Array.from(sec.querySelectorAll<HTMLElement>('.ch, .seg'));
-  const rows = sec.querySelectorAll('.id-row').length + 1;
-
-  type Geo = { dx: number; dy: number; rot: number; delay: number; dim: boolean };
-  let geo: Geo[] = [];
   const lit = new Array(letters.length).fill(false);
+
+  // Fasi, in frazioni dello scroll della sezione:
+  //  0 → FILL_END      il testo si riempie dal grigio al nero
+  //  → BREAK           pausa: la tabella si legge intera
+  //  BREAK → +SPREAD   si rompe: i pezzi si separano in orizzontale
+  //  → 1               cadono per gravità e si posano senza toccarsi
+  const FILL_END = 0.18;
+  const BREAK = 0.26;
+  const SPREAD = 0.14; // quota della fase di crollo dedicata alla separazione
+  const GAP = 6; // distanza minima fra pezzi posati, in px
+  const MAX_ROT = 18; // gradi
+  // cadendo i pezzi si rimpiccioliscono, vanno "in profondità". Su schermi
+  // stretti di più: le righe hanno poco spazio per allargarsi e il mucchio
+  // verrebbe alto quanto la tabella
+  let SHRINK = 0.8;
+
+  type Geo = { dx: number; dy: number; rot: number; start: number; dim: boolean };
+  let geo: Geo[] = [];
+  let g = 1;
+
+  /** Ingombro di un rettangolo scalato e ruotato. */
+  const box = (w: number, h: number, deg: number, k = 1) => {
+    const a = (Math.abs(deg) * Math.PI) / 180;
+    return { w: k * (w * Math.cos(a) + h * Math.sin(a)), h: k * (h * Math.cos(a) + w * Math.sin(a)) };
+  };
+  /** Scala e rotazione a un certo punto u (0→1) della caduta. */
+  const scaleAt = (u: number) => 1 - (1 - SHRINK) * easeInOut(u);
 
   function measure() {
     pieces.forEach((p) => (p.style.transform = ''));
+    if (portrait) portrait.style.transform = '';
     const s = stage.getBoundingClientRect();
+    const W = s.width;
+    SHRINK = W < 700 ? 0.6 : 0.8;
+    const floor = s.height - 84; // resta libera la fascia dell'indice "01 / 04"
     const rand = rng(2003);
-    // il pavimento lascia libera la fascia in basso dell'indice "01 / 05"
-    const floor = s.height - 84;
-    const pile = s.height * 0.14;
-    geo = pieces.map((p, i) => {
+
+    const raw = pieces.map((p) => {
       const r = p.getBoundingClientRect();
-      const x = r.left - s.left;
-      const y = r.top - s.top;
-      const seg = p.classList.contains('seg');
-      const row = Number(p.closest<HTMLElement>('[data-row]')?.dataset.row ?? 0);
-      // la tabella cede dal basso: le righe in fondo partono per prime
-      const delay = (1 - row / rows) * 0.3 + rand() * 0.2;
-      const tx = clamp(x + (rand() - 0.5) * s.width * 0.3, 0, s.width - r.width);
-      const ty = floor - r.height - rand() * pile;
-      return {
-        dx: tx - x,
-        dy: ty - y,
-        rot: (rand() - 0.5) * (seg ? 50 : 230),
-        delay,
-        dim: !seg && i % 3 === 0,
-      };
+      return { x: r.left - s.left, y: r.top - s.top, w: r.width, h: r.height, seg: p.classList.contains('seg') };
     });
+    const minX = Math.min(...raw.map((r) => r.x));
+    const maxX = Math.max(...raw.map((r) => r.x + r.w));
+    const minY = Math.min(...raw.map((r) => r.y));
+    const maxY = Math.max(...raw.map((r) => r.y + r.h));
+
+    // 1. separazione, riga per riga. I pezzi si raggruppano in fasce
+    //    orizzontali che non si sovrappongono in altezza (una riga di testo,
+    //    un filetto). Ogni fascia si allarga per conto suo su tutta la
+    //    larghezza, con una dilatazione uniforme: dentro la fascia l'ordine
+    //    resta e gli spazi crescono, e fasce diverse stanno ad altezze
+    //    diverse, quindi niente si incrocia. Righe diverse finiscono su
+    //    colonne diverse: il mucchio si distribuisce invece di impilarsi.
+    const ids = raw.map((_, i) => i).sort((a, b) => raw[a].y - raw[b].y);
+    const bands: number[][] = [];
+    let bottom = -Infinity;
+    for (const i of ids) {
+      const r = raw[i];
+      if (r.y >= bottom - 0.25) {
+        bands.push([i]); // inizia sotto la fascia precedente: fascia nuova
+        bottom = r.y + r.h;
+      } else {
+        bands[bands.length - 1].push(i);
+        bottom = Math.max(bottom, r.y + r.h);
+      }
+    }
+    const tx = new Array(raw.length).fill(0);
+    const M = 16;
+    bands.forEach((band) => {
+      const bx0 = Math.min(...band.map((i) => raw[i].x));
+      const bx1 = Math.max(...band.map((i) => raw[i].x + raw[i].w));
+      const span = Math.max(1, bx1 - bx0);
+      const k = Math.max(1, Math.min(2.6, (W - 2 * M) / span));
+      const free = W - 2 * M - span * k;
+      const offset = M + free * rand();
+      band.forEach((i) => (tx[i] = offset + (raw[i].x - bx0) * k));
+    });
+
+    // 2. rotazione concessa a ciascun pezzo: quanta ne permette lo spazio
+    //    libero ai suoi lati sulla stessa riga (metà a testa col vicino)
+    const room = raw.map((r, i) => {
+      let free = Infinity;
+      raw.forEach((o, j) => {
+        if (j === i) return;
+        const sameBand = o.y < r.y + r.h && o.y + o.h > r.y;
+        if (!sameBand) return;
+        const gap = tx[j] >= tx[i] ? tx[j] - (tx[i] + r.w) : tx[i] - (tx[j] + o.w);
+        free = Math.min(free, gap);
+      });
+      return free;
+    });
+    const rot = raw.map((r, i) => {
+      const budget = (room[i] - 2) / 2; // allargamento massimo per lato
+      const limit = r.seg ? 3 : MAX_ROT;
+      // si controlla tutta la caduta, non solo la posa: rotazione e
+      // rimpicciolimento crescono insieme
+      const fits = (d: number) =>
+        [0.25, 0.5, 0.75, 1].every((u) => (box(r.w, r.h, d * easeInOut(u), scaleAt(u)).w - r.w) / 2 <= budget);
+      let deg = 0;
+      for (let d = 0.5; d <= limit; d += 0.5) {
+        if (!fits(d)) break;
+        deg = d;
+      }
+      return (rand() < 0.5 ? -1 : 1) * deg * (0.55 + rand() * 0.45);
+    });
+
+    // 3. partenza: cede prima il basso. Chi sta sopra parte dopo e con la
+    //    stessa gravità non raggiunge mai chi sta sotto nella sua colonna.
+    const start = raw.map((r) => 0.45 * ((maxY - (r.y + r.h)) / Math.max(1, maxY - minY)) + rand() * 0.012);
+
+    // 4. mucchio: ogni pezzo si posa sul più alto già posato nelle sue
+    //    colonne, a GAP di distanza. Si posano nell'ordine in cui arrivano.
+    const sky = new Float32Array(Math.ceil(W) + 2).fill(floor);
+    const order = raw.map((_, i) => i).sort((a, b) => start[a] - start[b]);
+    const dy = new Array(raw.length).fill(0);
+    let stuck = 0;
+    for (const i of order) {
+      const r = raw[i];
+      const b = box(r.w, r.h, rot[i], SHRINK);
+      const left = Math.max(0, Math.floor(tx[i] + r.w / 2 - b.w / 2 - GAP / 2));
+      const right = Math.min(sky.length - 1, Math.ceil(tx[i] + r.w / 2 + b.w / 2 + GAP / 2));
+      let top = floor;
+      for (let c = left; c <= right; c++) top = Math.min(top, sky[c]);
+      const restTop = top - GAP - b.h; // bordo alto dell'ingombro ruotato
+      for (let c = left; c <= right; c++) sky[c] = restTop;
+      const restY = restTop + b.h / 2 - r.h / 2; // posizione dell'elemento
+      dy[i] = Math.max(0, restY - r.y);
+      if (restY < r.y) stuck++;
+    }
+    // pezzi che il mucchio non riesce a ospitare più in basso di dove sono:
+    // deve restare 0 (lo verifica il banco di prova)
+    stage.dataset.stuck = String(stuck);
+
+    // gravità unica, scelta perché l'ultimo pezzo tocchi terra a fine scroll
+    g = Math.max(1, ...raw.map((_, i) => (2 * dy[i]) / Math.pow(1 - start[i], 2)));
+
+    geo = raw.map((r, i) => ({
+      dx: tx[i] - r.x,
+      dy: dy[i],
+      rot: rot[i],
+      start: start[i],
+      dim: !r.seg && i % 3 === 0,
+    }));
   }
 
   measure();
@@ -150,9 +266,8 @@ function identity(): Updater[] {
     if (r.bottom < 0 || r.top > vh) return;
     const p = clamp(-r.top / (r.height - vh));
 
-    // fase 1: riempimento dal grigio al nero, in ordine di lettura
-    const fill = clamp(p / 0.36);
-    const lettersOn = Math.round(fill * letters.length);
+    // riempimento dal grigio al nero, in ordine di lettura
+    const lettersOn = Math.round(clamp(p / FILL_END) * letters.length);
     letters.forEach((l, i) => {
       const on = i < lettersOn;
       if (on !== lit[i]) {
@@ -161,21 +276,32 @@ function identity(): Updater[] {
       }
     });
 
-    // fase 2 (dopo una pausa): la tabella si rompe e crolla
-    const c = clamp((p - 0.5) / 0.44);
+    const c = clamp((p - BREAK) / (1 - BREAK));
+    const spread = easeInOut(clamp(c / SPREAD));
+    const T = clamp((c - SPREAD) / (1 - SPREAD));
+
+    // il ritratto si alza e lascia il posto alla rottura
+    if (portrait) {
+      const lift = easeInOut(clamp(c / SPREAD));
+      portrait.style.transform = lift ? `translate3d(0, ${-lift * 30}%, 0)` : '';
+      portrait.style.opacity = String(1 - lift);
+    }
+
     pieces.forEach((el, i) => {
-      const g = geo[i];
-      if (!g) return;
-      const t = clamp((c - g.delay) / 0.5);
-      if (t <= 0) {
+      const gi = geo[i];
+      if (!gi) return;
+      const t = T - gi.start;
+      const fall = t > 0 ? Math.min(gi.dy, 0.5 * g * t * t) : 0;
+      const u = gi.dy > 0 ? fall / gi.dy : t > 0 ? 1 : 0;
+      if (!spread && !fall) {
         if (el.style.transform) el.style.transform = '';
         el.classList.remove('dim');
         return;
       }
-      // gravità: accelera, poi un piccolo rimbalzo sul fondo
-      const fall = t < 0.86 ? Math.pow(t / 0.86, 2) : 1 - 0.05 * Math.sin(((t - 0.86) / 0.14) * Math.PI);
-      el.style.transform = `translate3d(${g.dx * easeOut(t)}px, ${g.dy * fall}px, 0) rotate(${g.rot * easeOut(t)}deg)`;
-      el.classList.toggle('dim', g.dim && t > 0.35);
+      const rot = gi.rot * easeInOut(u);
+      const sc = scaleAt(u);
+      el.style.transform = `translate3d(${gi.dx * spread}px, ${fall}px, 0) rotate(${rot}deg)${sc < 1 ? ` scale(${sc})` : ''}`;
+      el.classList.toggle('dim', gi.dim && u > 0.3);
     });
   }
 

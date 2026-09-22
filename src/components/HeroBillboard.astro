@@ -1,8 +1,16 @@
 ---
-// Hero come billboard a carosello: i progetti in evidenza scorrono con
-// titolo e sottotitolo. Sostituisce il vecchio video full-bleed (7,6 MB
-// caricati sempre) con immagini ottimizzate: home molto più leggera.
+// Hero: carosello dei progetti in evidenza, in una cornice arrotondata che
+// lascia respirare la pagina. Regole seguite:
+//  - un solo titolo e una sola azione per slide (niente sottotitoli, niente
+//    riga di pulsanti sotto): la gerarchia si legge in un colpo d'occhio
+//  - il tempo dell'autoplay è visibile (barre che si riempiono) e si ferma
+//    al passaggio del mouse o al focus; niente autoplay con reduced-motion
+//  - testo sempre su un velo scuro, per il contrasto su qualsiasi foto
+//  - controllo da tastiera con le frecce
+// Il cambio slide: la foto entra con uno zoom lento, il titolo sale da una
+// maschera, come le lettere del resto della home.
 import { Image } from 'astro:assets';
+import { getEntry } from 'astro:content';
 import { getProjectAsset } from '../lib/images';
 import { getProjectCopy } from '../lib/content';
 import { useTranslations, type Lang } from '../i18n/ui';
@@ -14,7 +22,6 @@ interface Props {
 const { lang } = Astro.props;
 const t = useTranslations(lang);
 
-// Selezione: i progetti in evidenza più forti visivamente, una per categoria.
 const PICKS = [
   { slug: 'sabor-de-espana', image: 'serata.webp' },
   { slug: 'talea', image: 'hero-clean.webp' },
@@ -27,27 +34,35 @@ const slides = (
   await Promise.all(
     PICKS.map(async ({ slug, image }) => {
       const copy = await getProjectCopy(slug, lang);
+      const meta = await getEntry('projectMeta', slug);
       const img = getProjectAsset(slug, image);
-      if (!copy || !img) return null;
+      if (!copy || !img || !meta) return null;
+      const category = meta.data.category ? t(`cat.${meta.data.category}` as Parameters<typeof t>[0]) : '';
       return {
-        slug,
         img,
         title: copy.data.title,
-        sub: copy.data.dek ?? '',
+        kicker: [category, meta.data.year].filter(Boolean).join(' · '),
         href: `/${lang}/projects/${slug}/`,
       };
     })
   )
 ).filter((s) => s !== null);
+
+const pad = (n: number) => String(n).padStart(2, '0');
 ---
 
-<section class="billboard" aria-roledescription="carousel" aria-label={t('hero.label')}>
-  <p class="role">{t('home.role')}</p>
+<section class="billboard" aria-roledescription="carousel" aria-label={t('hero.label')} data-billboard>
+  <h1 class="sr-only">Adriano Parmentola — Portfolio</h1>
 
-  <div class="stage">
+  <div class="frame">
     {
       slides.map((s, i) => (
-        <article class="slide" data-index={i} aria-hidden={i === 0 ? 'false' : 'true'}>
+        <article
+          class:list={['slide', { active: i === 0 }]}
+          aria-roledescription="slide"
+          aria-label={`${i + 1} / ${slides.length}`}
+          aria-hidden={i === 0 ? 'false' : 'true'}
+        >
           <Image
             class="bg"
             src={s!.img}
@@ -57,91 +72,92 @@ const slides = (
             loading={i === 0 ? 'eager' : 'lazy'}
           />
           <div class="content">
-            <p class="eyebrow">
-              {t('hero.featured')}
-              <span class="count">0{i + 1} / 0{slides.length}</span>
+            <p class="kicker mask">
+              <span>
+                {pad(i + 1)} — {s!.kicker}
+              </span>
             </p>
-            <h1>{s!.title}</h1>
-            {s!.sub && <p class="sub">{s!.sub}</p>}
-            <a class="cta" href={s!.href}>{t('hero.discover')} →</a>
+            <h2 class="title mask">
+              <span>{s!.title}</span>
+            </h2>
+            <a class="go" href={s!.href} tabindex={i === 0 ? undefined : -1}>
+              <span class="go-label">{t('hero.discover')}</span>
+              <span class="go-arrow" aria-hidden="true">→</span>
+            </a>
           </div>
         </article>
       ))
     }
-  </div>
 
-  <div class="controls">
-    <button class="arrow" data-dir="-1" aria-label={t('hero.prev')}>←</button>
-    <div class="dots" role="tablist">
+    <div class="bars" role="group" aria-label={t('hero.label')}>
       {
         slides.map((s, i) => (
           <button
-            class="dot"
+            class:list={['bar', { active: i === 0 }]}
             data-goto={i}
-            role="tab"
-            aria-selected={i === 0 ? 'true' : 'false'}
             aria-label={s!.title}
-          />
+            aria-current={i === 0 ? 'true' : undefined}
+          >
+            <span class="bar-name">{s!.title}</span>
+            <span class="track">
+              <span class="fill" />
+            </span>
+          </button>
         ))
       }
     </div>
-    <button class="arrow" data-dir="1" aria-label={t('hero.next')}>→</button>
   </div>
 </section>
 
 <script>
   function initBillboard() {
-    const box = document.querySelector<HTMLElement>('.billboard');
+    const box = document.querySelector<HTMLElement>('[data-billboard]');
     if (!box || box.dataset.ready === '1') return;
     box.dataset.ready = '1';
 
     const slides = Array.from(box.querySelectorAll<HTMLElement>('.slide'));
-    const dots = Array.from(box.querySelectorAll<HTMLElement>('.dot'));
+    const bars = Array.from(box.querySelectorAll<HTMLElement>('.bar'));
     if (slides.length < 2) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) box.classList.add('static');
 
     let current = 0;
-    let timer: number | undefined;
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
     function show(next: number) {
       current = (next + slides.length) % slides.length;
       slides.forEach((s, i) => {
-        s.classList.toggle('active', i === current);
-        s.setAttribute('aria-hidden', i === current ? 'false' : 'true');
+        const on = i === current;
+        s.classList.toggle('active', on);
+        s.setAttribute('aria-hidden', on ? 'false' : 'true');
+        const link = s.querySelector<HTMLElement>('.go');
+        if (on) link?.removeAttribute('tabindex');
+        else link?.setAttribute('tabindex', '-1');
       });
-      dots.forEach((d, i) => d.setAttribute('aria-selected', i === current ? 'true' : 'false'));
-    }
-
-    function stop() {
-      if (timer) window.clearInterval(timer);
-    }
-
-    function play() {
-      if (reduced) return;
-      stop();
-      timer = window.setInterval(() => show(current + 1), 6000);
-    }
-
-    box.querySelectorAll<HTMLElement>('.arrow').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        show(current + Number(btn.dataset.dir));
-        play();
+      bars.forEach((b, i) => {
+        b.classList.toggle('active', i === current);
+        b.classList.toggle('done', i < current);
+        if (i === current) b.setAttribute('aria-current', 'true');
+        else b.removeAttribute('aria-current');
+        // riavvia l'animazione di riempimento della barra attiva
+        const fill = b.querySelector<HTMLElement>('.fill')!;
+        fill.style.animation = 'none';
+        void fill.offsetWidth;
+        fill.style.animation = '';
       });
+    }
+
+    // il tempo lo scandisce il CSS: quando la barra attiva è piena, si avanza
+    bars.forEach((b) =>
+      b.querySelector('.fill')!.addEventListener('animationend', () => {
+        if (b.classList.contains('active')) show(current + 1);
+      })
+    );
+    bars.forEach((b, i) => b.addEventListener('click', () => show(i)));
+
+    box.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight') show(current + 1);
+      if (e.key === 'ArrowLeft') show(current - 1);
     });
-
-    dots.forEach((d) => {
-      d.addEventListener('click', () => {
-        show(Number(d.dataset.goto));
-        play();
-      });
-    });
-
-    box.addEventListener('mouseenter', stop);
-    box.addEventListener('mouseleave', play);
-    box.addEventListener('focusin', stop);
-
-    show(0);
-    play();
+    box.addEventListener('focusin', () => box.classList.add('paused'));
+    box.addEventListener('focusout', () => box.classList.remove('paused'));
   }
 
   initBillboard();
@@ -150,48 +166,32 @@ const slides = (
 
 <style>
   .billboard {
+    padding: 0 var(--space-2);
+  }
+
+  .frame {
     position: relative;
-    min-height: 84vh;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
+    height: clamp(520px, calc(100svh - 7.5rem), 900px);
+    border-radius: 1.5rem;
     overflow: hidden;
     background: var(--color-text);
-  }
-
-  .role {
-    position: absolute;
-    top: var(--space-4);
-    left: var(--space-4);
-    right: var(--space-4);
-    z-index: 3;
-    color: #fff;
-    font-size: var(--text-meta);
-    font-weight: var(--weight-bold);
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    max-width: 38ch;
-    text-shadow: 0 1px 12px rgb(0 0 0 / 0.5);
-  }
-
-  .stage {
-    position: absolute;
-    inset: 0;
+    isolation: isolate;
   }
 
   .slide {
     position: absolute;
     inset: 0;
-    opacity: 0;
     visibility: hidden;
-    transition: opacity 0.7s ease;
-    display: flex;
-    align-items: flex-end;
+    opacity: 0;
+    transition:
+      opacity 0.9s ease,
+      visibility 0s linear 0.9s;
   }
 
   .slide.active {
-    opacity: 1;
     visibility: visible;
+    opacity: 1;
+    transition: opacity 0.9s ease;
   }
 
   .slide :global(.bg) {
@@ -200,129 +200,227 @@ const slides = (
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transform: scale(1.08);
+    transition: transform 7s cubic-bezier(0.2, 0.6, 0.2, 1);
+  }
+
+  .slide.active :global(.bg) {
+    transform: scale(1);
+  }
+
+  /* velo: più denso in basso a sinistra, dove sta il testo */
+  .slide::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(to top, rgb(20 20 20 / 0.78), rgb(20 20 20 / 0.1) 55%, transparent),
+      linear-gradient(to right, rgb(20 20 20 / 0.35), transparent 60%);
+    pointer-events: none;
   }
 
   .content {
-    position: relative;
-    width: 100%;
-    padding: var(--space-8) var(--space-4) var(--space-12);
-    background: linear-gradient(to top, rgb(20 20 20 / 0.82), rgb(20 20 20 / 0.25) 55%, transparent);
+    position: absolute;
+    z-index: 1;
+    left: clamp(1.25rem, 4vw, 3.5rem);
+    right: clamp(1.25rem, 4vw, 3.5rem);
+    bottom: clamp(5.5rem, 12vh, 8rem);
     color: #fff;
   }
 
-  .eyebrow {
-    display: flex;
-    align-items: baseline;
-    gap: var(--space-2);
+  /* testo che sale da una maschera */
+  .mask {
+    overflow: hidden;
+    margin: 0;
+  }
+
+  .mask > span {
+    display: inline-block;
+    transform: translateY(105%);
+    transition: transform 0.9s cubic-bezier(0.2, 0.7, 0.1, 1);
+  }
+
+  .slide.active .mask > span {
+    transform: none;
+  }
+
+  .slide.active .title > span {
+    transition-delay: 0.12s;
+  }
+
+  .kicker {
     font-size: var(--text-meta);
     font-weight: var(--weight-bold);
     text-transform: uppercase;
     letter-spacing: 0.14em;
-    margin-bottom: var(--space-2);
+    margin-bottom: 0.9rem;
+    color: rgb(255 255 255 / 0.85);
   }
 
-  .count {
-    color: var(--color-accent);
-    font-variant-numeric: tabular-nums;
-  }
-
-  h1 {
-    font-size: var(--text-display-small);
+  .title {
+    font-size: clamp(2.6rem, 1.2rem + 5.4vw, 7rem);
     font-weight: var(--weight-bold);
-    line-height: 1.04;
-    letter-spacing: -0.015em;
-    max-width: 18ch;
-    text-shadow: 0 2px 30px rgb(0 0 0 / 0.4);
+    line-height: 0.95;
+    letter-spacing: -0.035em;
+    padding-bottom: 0.08em;
   }
 
-  .sub {
-    margin-top: var(--space-2);
-    font-size: var(--text-h3);
-    font-weight: var(--weight-light);
-    max-width: 46ch;
-  }
-
-  .cta {
-    display: inline-block;
-    margin-top: var(--space-4);
-    font-weight: var(--weight-bold);
-    background: var(--color-accent);
-    color: var(--color-text);
-    border-radius: 999px;
-    padding: 0.75rem 1.5rem;
-    transition: transform 0.2s;
-  }
-
-  .cta:hover {
-    transform: translateY(-2px);
-  }
-
-  .controls {
-    position: absolute;
-    right: var(--space-4);
-    bottom: var(--space-4);
-    z-index: 3;
-    display: flex;
+  /* unica azione: freccia in un cerchio lime con la sua etichetta */
+  .go {
+    display: inline-flex;
     align-items: center;
-    gap: var(--space-2);
-  }
-
-  .arrow {
-    width: 2.75rem;
-    height: 2.75rem;
-    border-radius: 50%;
-    border: 1px solid rgb(255 255 255 / 0.55);
-    background: rgb(20 20 20 / 0.35);
+    gap: 0.8rem;
+    margin-top: 1.6rem;
     color: #fff;
-    font-size: 1rem;
-    cursor: pointer;
-    transition: background 0.2s, border-color 0.2s, color 0.2s;
+    font-weight: var(--weight-bold);
+    opacity: 0;
+    transform: translateY(12px);
+    transition:
+      opacity 0.6s ease 0.35s,
+      transform 0.6s ease 0.35s;
   }
 
-  .arrow:hover,
-  .arrow:focus-visible {
-    background: var(--color-accent);
-    border-color: var(--color-accent);
-    color: var(--color-text);
+  .slide.active .go {
+    opacity: 1;
+    transform: none;
   }
 
-  .dots {
-    display: flex;
-    gap: 0.5rem;
-  }
-
-  .dot {
-    width: 0.6rem;
-    height: 0.6rem;
-    padding: 0;
+  .go-arrow {
+    display: grid;
+    place-items: center;
+    width: 3.2rem;
+    height: 3.2rem;
     border-radius: 50%;
-    border: 1px solid rgb(255 255 255 / 0.7);
-    background: transparent;
-    cursor: pointer;
+    background: var(--color-accent);
+    color: var(--color-text);
+    font-size: 1.2rem;
+    transition: transform 0.3s cubic-bezier(0.3, 0.9, 0.3, 1);
   }
 
-  .dot[aria-selected='true'] {
+  .go-label {
+    order: 2;
+    font-size: var(--text-meta);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+  }
+
+  .go:hover .go-arrow,
+  .go:focus-visible .go-arrow {
+    transform: translateX(4px) rotate(-45deg);
+  }
+
+  /* ---------- barre di avanzamento ---------- */
+  .bars {
+    position: absolute;
+    z-index: 2;
+    left: clamp(1.25rem, 4vw, 3.5rem);
+    right: clamp(1.25rem, 4vw, 3.5rem);
+    bottom: clamp(1.25rem, 3vh, 2rem);
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: 0.75rem;
+  }
+
+  .bar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.4rem 0 0;
+    background: none;
+    border: 0;
+    color: rgb(255 255 255 / 0.55);
+    text-align: left;
+    cursor: pointer;
+    font: inherit;
+  }
+
+  .bar-name {
+    font-size: 0.7rem;
+    font-weight: var(--weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: color 0.3s;
+  }
+
+  .bar:hover .bar-name,
+  .bar.active .bar-name {
+    color: #fff;
+  }
+
+  .track {
+    display: block;
+    height: 2px;
+    background: rgb(255 255 255 / 0.28);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .fill {
+    display: block;
+    height: 100%;
     background: var(--color-accent);
-    border-color: var(--color-accent);
+    transform-origin: 0 50%;
+    transform: scaleX(0);
+  }
+
+  .bar.done .fill {
+    transform: scaleX(1);
+    background: rgb(255 255 255 / 0.7);
+  }
+
+  .bar.active .fill {
+    animation: fill 6.5s linear forwards;
+  }
+
+  .billboard:hover .bar.active .fill,
+  .billboard.paused .bar.active .fill {
+    animation-play-state: paused;
+  }
+
+  .billboard.static .bar.active .fill {
+    animation: none;
+    transform: scaleX(1);
+  }
+
+  @keyframes fill {
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
   }
 
   @media (max-width: 700px) {
     .billboard {
-      min-height: 76vh;
+      padding: 0 var(--space-1);
     }
 
-    .controls {
-      left: var(--space-4);
-      right: auto;
+    .frame {
+      height: clamp(460px, calc(100svh - 9rem), 720px);
+      border-radius: 1.1rem;
     }
 
-    .content {
-      padding-bottom: var(--space-16);
+    .bar-name {
+      display: none;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .slide {
+    .slide,
+    .slide :global(.bg),
+    .mask > span,
+    .go {
       transition: none;
     }
   }
