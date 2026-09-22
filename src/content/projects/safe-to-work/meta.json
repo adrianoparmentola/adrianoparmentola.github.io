@@ -1,14 +1,75 @@
 {
   "name": "SAFE2WORK",
-  "type": "campagna",
+  "type": "servizio",
   "status": "include",
   "featured": false,
-  "methodTags": [],
+  "methodTags": ["Service Design", "User Journey", "Service Blueprint", "Business Model Canvas"],
   "assets": [
     {
       "src": "hero.webp",
       "kind": "image",
-      "role": "hero"
+      "role": "hero",
+      "caption": "Campagna di affissione — Ride Home Ride Safe"
+    },
+    {
+      "src": "identity.webp",
+      "kind": "image",
+      "role": "gallery",
+      "caption": "Identità visiva applicata: merchandising, affissioni, packaging"
+    },
+    {
+      "src": "app.webp",
+      "kind": "image",
+      "role": "gallery",
+      "caption": "L'applicazione: percorso, segnalazioni, monitoraggio, classifiche"
+    },
+    {
+      "src": "touchpoints.webp",
+      "kind": "image",
+      "role": "gallery",
+      "caption": "I quattro touchpoint: flotta, app, piattaforma dati, campagna"
+    },
+    {
+      "src": "field-research.webp",
+      "kind": "image",
+      "role": "gallery",
+      "caption": "Ricerca sul campo lungo la Ciclovia del Savio"
+    },
+    {
+      "src": "personas.webp",
+      "kind": "image",
+      "role": "gallery",
+      "caption": "Le quattro personas del servizio"
+    },
+    {
+      "src": "system-flow.webp",
+      "kind": "image",
+      "role": "gallery",
+      "caption": "System flow del servizio"
+    },
+    {
+      "src": "service-blueprint.webp",
+      "kind": "image",
+      "role": "gallery",
+      "caption": "Service blueprint"
+    },
+    {
+      "src": "insights.webp",
+      "kind": "image",
+      "role": "gallery",
+      "caption": "Gli insight della ricerca"
+    },
+    {
+      "src": "process.webp",
+      "kind": "image",
+      "role": "gallery",
+      "caption": "Il processo progettuale in tre fasi"
+    },
+    {
+      "src": "moodboard.webp",
+      "kind": "image",
+      "role": "gallery",
+      "caption": "Moodboard"
     },
     {
       "src": "label-tag.webp",

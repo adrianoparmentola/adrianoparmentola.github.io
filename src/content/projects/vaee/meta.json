@@ -1,14 +1,57 @@
 {
-  "name": "Vaee",
+  "name": "VAEE",
   "type": "prodotto",
   "status": "include",
   "featured": false,
-  "methodTags": [],
+  "methodTags": ["QFD", "Matrice morfologica", "Analisi di affidabilità", "Ricerca brevettuale"],
   "assets": [
     {
       "src": "hero.webp",
       "kind": "image",
-      "role": "hero"
+      "role": "hero",
+      "caption": "Il bracciale contenitore"
+    },
+    {
+      "src": "renders.webp",
+      "kind": "image",
+      "role": "gallery",
+      "caption": "I tre bracciali del set"
+    },
+    {
+      "src": "colours.webp",
+      "kind": "image",
+      "role": "gallery",
+      "caption": "Varianti colore"
+    },
+    {
+      "src": "mechanism.webp",
+      "kind": "image",
+      "role": "gallery",
+      "caption": "Sezione del meccanismo di chiusura ed erogazione"
+    },
+    {
+      "src": "morphology.webp",
+      "kind": "image",
+      "role": "gallery",
+      "caption": "Matrice morfologica: le soluzioni messe a confronto"
+    },
+    {
+      "src": "qfd.webp",
+      "kind": "image",
+      "role": "gallery",
+      "caption": "QFD — la casa della qualità"
+    },
+    {
+      "src": "reliability.webp",
+      "kind": "image",
+      "role": "gallery",
+      "caption": "Analisi di affidabilità: guasti attesi e MTTF"
+    },
+    {
+      "src": "survey.webp",
+      "kind": "image",
+      "role": "gallery",
+      "caption": "Il sondaggio sugli utenti viaggiatori"
     }
   ],
   "year": "2022",
