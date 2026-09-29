@@ -1,0 +1,106 @@
+{
+  "_note": "Testi del CV. Niente trattini lunghi (em dash): al loro posto la virgola. I trattini corti nelle date (2025 – present) restano, sono intervalli.",
+  "name": "ADRIANO PARMENTOLA",
+  "role": "SERVICE DESIGNER · HOSPITALITY & FOOD EXPERIENCE",
+  "contact": ["Bologna, IT", "+39 366 291 1928", "adrianoparmentola03@gmail.com"],
+  "profileTitle": "PROFILE",
+  "profile": "Service designer with a background in industrial design and hands-on experience in food service operations. I design service experiences at the intersection of food, hospitality and space, from research and discovery through blueprinting, prototyping and delivery, working on complex systems with a methodical approach, cross-functional collaboration and sensitivity to the detail of human experience. Comfortable coordinating multiple projects to deadline and producing the visual and content assets that campaigns and services need.",
+  "experienceTitle": "EXPERIENCE",
+  "experience": [
+    {
+      "role": "Culinary Workshop Facilitator (freelance)",
+      "org": "We Find Group Talent Acquisition, Madrid (ES)",
+      "date": "08/2026",
+      "bullets": [
+        "End-to-end design and delivery of a 4-hour Spanish cooking workshop: menu planning, ingredient sourcing, budget management, hands-on facilitation for a group of participants.",
+        "Independent client engagement: scoping, coordination and on-site execution in an international setting."
+      ]
+    },
+    {
+      "role": "AI Workshop Tutor",
+      "org": "Bloom Life",
+      "date": "04/2026 – 06/2026",
+      "note": "Progetto \"Evolversi con l'AI\"",
+      "bullets": [
+        "Facilitated online AI training workshops for primary and secondary school teachers, supporting digital didactics adoption: training delivery, digital content preparation, online facilitation."
+      ]
+    },
+    {
+      "role": "Systems Designer",
+      "org": "Hum.us Space, Bologna",
+      "date": "05/2025 – present",
+      "bullets": [
+        "Design and implementation of new services for a university collective restaurant.",
+        "Event and catering organisation; promotional assets (poster, social content, presentations), data collection and KPI tracking. -10% operating costs, +5% revenue."
+      ]
+    },
+    {
+      "role": "Curricular Internship",
+      "org": "Hum.us Space, Bologna",
+      "date": "03/2025 – 05/2025",
+      "bullets": [
+        "Service research and prototyping. UX redesign of the Bononia venue.",
+        "3D modelling and commercial space planning."
+      ]
+    },
+    {
+      "role": "Sales Assistant",
+      "org": "Inditex, Bologna",
+      "date": "05/2024 – 06/2024",
+      "bullets": ["Till management, customer relations, problem solving under pressure."]
+    },
+    {
+      "role": "Artist / Designer",
+      "org": "Hummus Srl., Venice · Camplus, Bologna",
+      "date": "05/2023",
+      "bullets": ["Design and execution of commissioned mural installations for public and residential spaces."]
+    },
+    {
+      "role": "Bar & Warehouse Assistant",
+      "org": "La Madonnella, Castropignano",
+      "date": "06/2021 – 08/2021",
+      "bullets": ["Stock management, order cataloguing, customer relations."]
+    }
+  ],
+  "educationTitle": "EDUCATION",
+  "education": [
+    {
+      "role": "Master's Degree in Advanced Design, Service Design curriculum",
+      "date": "2025 – present",
+      "note": "Final year in progress",
+      "bullets": [
+        "Core areas: service design & blueprinting · systemic design of complex service ecosystems · UX/UI and digital product design · interactive prototyping · market research & discovery (user interviews, stakeholder mapping) · integration of sustainable technologies.",
+        "Applied skills: 3D modelling, technical drawing, data-driven visual storytelling."
+      ]
+    },
+    {
+      "role": "Bachelor's Degree in Design del Prodotto Industriale (Industrial Product Design)",
+      "date": "2022 – 2025",
+      "note": "Grade: 100/110 · Thesis: redesign of the Bononia catering service using Six Sigma methodology",
+      "bullets": [
+        "Coursework spanning analogue and digital drawing, 2D/3D modelling, materials studies and design history, through to product-system, graphic communication and new-media studios."
+      ]
+    },
+    {
+      "role": "Scientific High School Diploma",
+      "date": "2022",
+      "bullets": []
+    }
+  ],
+  "columns": [
+    {
+      "title": "TOOLS",
+      "lines": [
+        "Figma · Adobe Photoshop · Illustrator · InDesign · Rhino · Blender · Alias · AutoCAD · Creo Parametric · Claude Code · Microsoft Excel · PowerPoint · Word"
+      ]
+    },
+    {
+      "title": "LANGUAGES",
+      "lines": ["Italian, native", "English, C1 (IESOL 2023)"]
+    },
+    {
+      "title": "WEBSITE",
+      "lines": ["Portfolio & personal website", "adrianoparmentola.github.io/en"]
+    }
+  ]
+}
