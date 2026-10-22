@@ -44,12 +44,12 @@ quindi ogni misura è esplicita e ripetibile.
 
 ## Foto
 
- è il ritaglio quadrato usato in testata (27 mm, in alto a
-destra). Nasce da :
-quadrato centrato sul viso, con il volto al 40% dall'altezza, e un ritocco
+`cv/photo.jpg` è il ritaglio quadrato usato in testata (27 mm, in alto a
+destra). Nasce da `wbsite assets/foto personali/volto portfolio.jpg`:
+quadrato centrato sul viso, con il volto al 40% dell'altezza, e un ritocco
 di luce perché l'originale è notturno e in stampa verrebbe cupo.
 
-Per cambiarla basta sostituire  con un altro quadrato.
+Per cambiarla basta sostituire `cv/photo.jpg` con un altro quadrato.
 
 ## QR
 
