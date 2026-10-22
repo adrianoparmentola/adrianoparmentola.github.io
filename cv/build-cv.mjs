@@ -37,6 +37,9 @@ const MARGIN_X = 850; // 15 mm
 const CONTENT_W = PAGE_W - MARGIN_X * 2;
 const BULLET_IND = 175; // rientro della lista: dove inizia il testo
 const COL_W = Math.floor(CONTENT_W / 3);
+const QR_MM = 18; // QR: più piccolo di così un telefono fatica
+const PHOTO_MM = 27; // foto in testa
+const PHOTO_CELL = Math.round(PHOTO_MM * 56.7); // colonna della foto, in twip
 const COL_GUTTER = 420;
 
 const FONT = 'Arial';
@@ -69,7 +72,7 @@ const LINKS = { mail: { id: 'rId6', url: 'mailto:' + c.contact[2] }, site: { id:
 const link = (text, which, opts) => `<w:hyperlink r:id="${LINKS[which].id}">${run(text, opts)}</w:hyperlink>`;
 
 /** Un paragrafo. line = interlinea fissa in punti. */
-function para(runs, { before = 0, after = 0, line = 10, ind = 0, hanging = 0, rightTab = 0, border = false, justify = false } = {}) {
+function para(runs, { before = 0, after = 0, line = 10, ind = 0, hanging = 0, rightTab = 0, border = false, justify = false, align = '', auto = false } = {}) {
   const tabs = [];
   if (hanging) tabs.push(`<w:tab w:val="left" w:pos="${ind}"/>`);
   if (rightTab) tabs.push(`<w:tab w:val="right" w:pos="${rightTab}"/>`);
@@ -78,8 +81,11 @@ function para(runs, { before = 0, after = 0, line = 10, ind = 0, hanging = 0, ri
     (tabs.length ? `<w:tabs>${tabs.join('')}</w:tabs>` : '') +
     (ind ? `<w:ind w:left="${ind}"${hanging ? ` w:hanging="${hanging}"` : ''}/>` : '') +
     (border ? `<w:pBdr><w:bottom w:val="single" w:sz="4" w:space="3" w:color="${RULE}"/></w:pBdr>` : '') +
-    (justify ? '<w:jc w:val="both"/>' : '') +
-    `<w:spacing w:before="${Math.round(before * 20)}" w:after="${Math.round(after * 20)}" w:line="${Math.round(line * 20)}" w:lineRule="exact"/>` +
+    (justify ? '<w:jc w:val="both"/>' : align ? `<w:jc w:val="${align}"/>` : '') +
+    // le immagini vogliono interlinea automatica: con quella fissa il
+    // paragrafo le ritaglia in alto
+    `<w:spacing w:before="${Math.round(before * 20)}" w:after="${Math.round(after * 20)}"` +
+    (auto ? ' w:line="240" w:lineRule="auto"/>' : ` w:line="${Math.round(line * 20)}" w:lineRule="exact"/>`) +
     '</w:pPr>' +
     runs.join('') +
     '</w:p>'
@@ -117,6 +123,53 @@ function entry(e) {
   return [entryHead(e), ...(e.note ? [noteLine(e.note)] : []), ...(e.bullets ?? []).map(bullet)].join('');
 }
 
+/** Un'immagine quadrata in linea. mm = lato in millimetri. */
+function image(relId, mm, id, name) {
+  const emu = Math.round(mm * 36000);
+  return (
+    `<w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0"><wp:extent cx="${emu}" cy="${emu}"/>` +
+    `<wp:docPr id="${id}" name="${name}"/>` +
+    '<a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">' +
+    `<pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="${id}" name="${name}"/><pic:cNvPicPr/></pic:nvPicPr>` +
+    `<pic:blipFill><a:blip r:embed="${relId}" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>` +
+    `<pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="${emu}" cy="${emu}"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr>` +
+    '</pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>'
+  );
+}
+
+/**
+ * Testata: nome, ruolo e contatti a sinistra, foto quadrata a destra.
+ * Tabella senza bordi: la foto resta agganciata al margine destro e non
+ * spinge il testo.
+ */
+function headerTable(photoRelId) {
+  const textCell =
+    `<w:tc><w:tcPr><w:tcW w:w="${CONTENT_W - PHOTO_CELL}" w:type="dxa"/><w:vAlign w:val="top"/>` +
+    '<w:tcMar><w:left w:w="0" w:type="dxa"/><w:right w:w="240" w:type="dxa"/></w:tcMar></w:tcPr>' +
+    para([run(c.name, { size: 19, bold: true })], { line: 21 }) +
+    para([run(c.role, { size: 8, bold: true })], { before: 2, line: 9.5 }) +
+    para(
+      [
+        run(c.contact[0] + '      ·      ', { size: 8, color: MUTED }),
+        run(c.contact[1] + '      ·      ', { size: 8, color: MUTED }),
+        link(c.contact[2], 'mail', { size: 8, color: MUTED }),
+      ],
+      { before: 3.5, line: 9.5 }
+    ) +
+    '</w:tc>';
+  const photoCell =
+    `<w:tc><w:tcPr><w:tcW w:w="${PHOTO_CELL}" w:type="dxa"/><w:vAlign w:val="top"/>` +
+    '<w:tcMar><w:left w:w="0" w:type="dxa"/><w:right w:w="0" w:type="dxa"/></w:tcMar></w:tcPr>' +
+    para([image(photoRelId, PHOTO_MM, 9, 'Foto')], { auto: true, align: 'right' }) +
+    '</w:tc>';
+  return (
+    `<w:tbl><w:tblPr><w:tblW w:w="${CONTENT_W}" w:type="dxa"/><w:tblLayout w:type="fixed"/>` +
+    '<w:tblCellMar><w:left w:w="0" w:type="dxa"/><w:right w:w="0" w:type="dxa"/></w:tblCellMar></w:tblPr>' +
+    `<w:tblGrid><w:gridCol w:w="${CONTENT_W - PHOTO_CELL}"/><w:gridCol w:w="${PHOTO_CELL}"/></w:tblGrid>` +
+    `<w:tr>${textCell}${photoCell}</w:tr></w:tbl>`
+  );
+}
+
 /** Le tre colonne in fondo: stessa larghezza, stessa distanza. */
 function columnsTable(qrRelId) {
   const cell = (col, i) => {
@@ -129,19 +182,8 @@ function columnsTable(qrRelId) {
         })
       ),
     ];
-    if (i === 2) {
-      body.push(
-        '<w:p><w:pPr><w:spacing w:before="90" w:after="0" w:line="240" w:lineRule="auto"/></w:pPr>' +
-          `<w:r><w:drawing><wp:inline distT="0" distB="0" distL="0" distR="0">` +
-          // 18 mm: leggibile dal telefono senza rubare la pagina
-          `<wp:extent cx="648000" cy="648000"/><wp:docPr id="7" name="QR"/>` +
-          `<a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture">` +
-          `<pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="7" name="QR"/><pic:cNvPicPr/></pic:nvPicPr>` +
-          `<pic:blipFill><a:blip r:embed="${qrRelId}" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>` +
-          `<pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="648000" cy="648000"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr>` +
-          `</pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r></w:p>`
-      );
-    }
+    // 18 mm: leggibile dal telefono senza rubare la pagina
+    if (i === 2) body.push(para([image(qrRelId, QR_MM, 7, 'QR')], { before: 4.5, auto: true }));
     const marRight = i < 2 ? COL_GUTTER : 0;
     return (
       `<w:tc><w:tcPr><w:tcW w:w="${COL_W}" w:type="dxa"/>` +
@@ -160,21 +202,9 @@ function columnsTable(qrRelId) {
 
 // ---------------------------------------------------------------- documento
 
-function documentXml(qrRelId) {
+function documentXml(qrRelId, photoRelId) {
   const parts = [];
-  parts.push(para([run(c.name, { size: 19, bold: true })], { line: 21 }));
-  parts.push(para([run(c.role, { size: 8, bold: true })], { before: 2, line: 9.5 }));
-  // più aria fra città, telefono e email
-  parts.push(
-    para(
-      [
-        run(c.contact[0] + '      ·      ', { size: 8, color: MUTED }),
-        run(c.contact[1] + '      ·      ', { size: 8, color: MUTED }),
-        link(c.contact[2], 'mail', { size: 8, color: MUTED }),
-      ],
-      { before: 3.5, after: 2, line: 9.5 }
-    )
-  );
+  parts.push(headerTable(photoRelId));
 
   parts.push(sectionTitle(c.profileTitle));
   parts.push(para([run(c.profile, { size: 8.7 })], { line: 10.7, justify: true }));
@@ -261,7 +291,9 @@ function zip(files) {
 // ---------------------------------------------------------------- build
 
 const qr = fs.readFileSync(path.join(HERE, 'qr.jpg'));
+const photo = fs.readFileSync(path.join(HERE, 'photo.jpg'));
 const QR_REL = 'rId5';
+const PHOTO_REL = 'rId9';
 
 const files = [
   [
@@ -290,6 +322,7 @@ const files = [
       `<Relationship Id="rId6" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="mailto:${c.contact[2]}" TargetMode="External"/>` +
       '<Relationship Id="rId7" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="https://adrianoparmentola.github.io/en/" TargetMode="External"/>' +
       '<Relationship Id="rId8" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>' +
+      `<Relationship Id="${PHOTO_REL}" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/photo.jpg"/>` +
       '</Relationships>',
   ],
   [
@@ -304,8 +337,9 @@ const files = [
       '<w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/><w:qFormat/></w:style>' +
       '</w:styles>',
   ],
-  ['word/document.xml', documentXml(QR_REL)],
+  ['word/document.xml', documentXml(QR_REL, PHOTO_REL)],
   ['word/media/qr.jpg', qr],
+  ['word/media/photo.jpg', photo],
 ];
 
 fs.writeFileSync(DOCX, zip(files));

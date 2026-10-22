@@ -42,6 +42,15 @@ quindi ogni misura è esplicita e ripetibile.
 - niente trattini lunghi nel testo (restano negli intervalli di date)
 - email e indirizzo del sito cliccabili nel PDF
 
+## Foto
+
+ è il ritaglio quadrato usato in testata (27 mm, in alto a
+destra). Nasce da :
+quadrato centrato sul viso, con il volto al 40% dall'altezza, e un ritocco
+di luce perché l'originale è notturno e in stampa verrebbe cupo.
+
+Per cambiarla basta sostituire  con un altro quadrato.
+
 ## QR
 
 `cv/qr.jpg` contiene `https://adrianoparmentola.github.io/en/` (verificato
