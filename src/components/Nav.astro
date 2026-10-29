@@ -16,13 +16,13 @@ interface Props {
 const { lang } = Astro.props;
 const t = useTranslations(lang);
 
-// "Metodo" volutamente fuori dalla top bar (resta raggiungibile dalla CTA
-// della home e dalle pagine progetto). Vedi NOTES.md.
+// "Misuro" (pagina /metodo/) è in top bar, dopo Contatto.
 const links = [
   { href: `/${lang}/`, label: t('nav.home') },
   { href: `/${lang}/projects/`, label: t('nav.projects') },
   { href: `/${lang}/cases/`, label: t('nav.cases') },
   { href: `/${lang}/contact/`, label: t('nav.contact') },
+  { href: `/${lang}/metodo/`, label: t('nav.method') },
 ];
 
 const currentPath = Astro.url.pathname.replace(new RegExp(`^/${lang}/`), '/');
