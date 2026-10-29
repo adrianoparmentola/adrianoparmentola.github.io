@@ -168,11 +168,12 @@ const BRAND = 'Adriano Parmentola';
     transition: padding 0.35s, background 0.35s, box-shadow 0.35s, max-width 0.45s;
   }
 
+  /* niente cambio di padding qui: l'altezza della barra deve restare fissa,
+     altrimenti il contenuto salta a ogni passaggio della soglia di scroll */
   .compact .bar {
     max-width: min(var(--content-max-width), 980px);
     background: rgb(246 245 241 / 0.88);
     box-shadow: 0 10px 30px rgb(20 20 20 / 0.08);
-    padding-block: 0.4rem;
   }
 
   /* ---------- nome ---------- */
