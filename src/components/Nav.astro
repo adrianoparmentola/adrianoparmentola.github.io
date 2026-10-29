@@ -318,14 +318,26 @@ const BRAND = 'Adriano Parmentola';
       row-gap: 0.2rem;
     }
 
+    /* su telefono il logo porta già alla home: il link Home si nasconde;
+       se i link non entrano, la riga scorre in orizzontale */
     .links {
       order: 3;
       width: 100%;
       justify-content: space-between;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+
+    .links::-webkit-scrollbar {
+      display: none;
     }
 
     .links a {
       padding: 0.45rem 0.6rem;
+    }
+
+    .links a:nth-of-type(1) {
+      display: none;
     }
   }
 
