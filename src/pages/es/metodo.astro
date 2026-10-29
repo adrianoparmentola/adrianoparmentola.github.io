@@ -1,0 +1,11 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Method from '../../sections/Method.astro';
+import { methodCopy } from '../../lib/method';
+
+const lang = 'es' as const;
+---
+
+<BaseLayout lang={lang} title={methodCopy[lang].seo.title}>
+  <Method lang={lang} />
+</BaseLayout>

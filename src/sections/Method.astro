@@ -1,0 +1,1646 @@
+---
+// Pagina /{lang}/metodo/ — "Misuro". Storia in sette capitoli:
+// tipo di locale → recorrido → zone del locale 3D → priorità → carta per cliente
+// → configuratore → metodo DMADV → caso. Il rendering è server-side; restano
+// dinamici: tag del locale, vista del recorrido, zone 3D, carta e configuratore.
+import { methodCopy, HOTSPOTS_TODAY, HOTSPOTS_REDESIGN, DISH_PRICE, type MenuGroup } from '../lib/method';
+import { buildScene, ZONE_IDS } from '../lib/method-scene';
+import { evaluate, FORMAT_IDS, LOCATION_IDS, TARGET_IDS, PRICE_IDS, type Choice } from '../lib/method-scenario';
+import type { Lang } from '../i18n/ui';
+
+interface Props {
+  lang: Lang;
+}
+
+const { lang } = Astro.props;
+const c = methodCopy[lang];
+const scene = buildScene({ sign: c.scene.sign, menu: c.scene.board });
+const caseHref = `/${lang}/projects/humus/`;
+const initialGroup = c.menu.groups[0];
+
+// Configuratore: stato iniziale. Il formato arriva anche dai tag dell'hero.
+const initial: Choice = { format: 'osteria', price: 2, location: 'centro', target: 'turisti' };
+const initialResult = evaluate(initial);
+
+const clientData = {
+  zones: ZONE_IDS,
+  scenario: { ...c.scenario, initial },
+  menu: {
+    groups: c.menu.groups as MenuGroup[],
+    dishes: c.menu.dishes,
+    targetKeys: Object.fromEntries(c.menu.targets.map((t) => [t.id, t.key])),
+  },
+  zoneText: c.scene.zones,
+};
+
+const ICONS: Record<string, string> = {
+  couple:
+    '<circle cx="8.5" cy="8.5" r="3"/><circle cx="15.5" cy="8.5" r="3"/><path d="M3 20c0-3 2.5-5 5.5-5M21 20c0-3-2.5-5-5.5-5"/>',
+  group:
+    '<circle cx="6" cy="9" r="2.5"/><circle cx="12" cy="8" r="3"/><circle cx="18" cy="9" r="2.5"/><path d="M2.5 19c0-2.5 1.5-4 3.5-4s3.5 1.5 3.5 4M9 19.5c0-2.5 1.2-4 3-4s3 1.5 3 4M15 19c0-2.5 1.5-4 3.5-4s3.5 1.5 3.5 4"/>',
+  pin:
+    '<path d="M12 21s-6.5-5.5-6.5-11a6.5 6.5 0 0 1 13 0c0 5.5-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/>',
+  clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+};
+
+const PLAN_TODAY_PATHS = {
+  customers: 'M30,205 L200,205 L230,140 L460,140 L520,190 L650,190 L700,200',
+  staff: 'M575,80 L330,80 L330,105',
+};
+const PLAN_REDESIGN_PATHS = {
+  guided: 'M30,205 L200,205 L230,140 L460,140 L520,190 L650,190',
+  quick: 'M30,205 L140,255 L200,280 L460,280 L600,300 L720,300',
+  staff: 'M575,80 L460,140',
+};
+
+---
+
+<div data-method data-locale={c.locale} data-lang={lang}>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <p class="brand reveal"><span class="dot" aria-hidden="true"></span>{c.hero.brand}</p>
+      <p class="kicker reveal">{c.hero.kicker}</p>
+      <h1 class="reveal">{c.hero.h1} <span class="muted">{c.hero.h1Muted}</span></h1>
+      <p class="lead reveal">{c.hero.lead}</p>
+      <div class="cta-row reveal">
+        <a class="cta primary" href="#recorrido">{c.hero.cta}</a>
+        <a class="cta" href={`/${lang}/contact/`}>{c.hero.ctaSecondary}</a>
+      </div>
+    </div>
+    <div class="tags reveal" aria-labelledby="tags-label">
+      <p class="kicker" id="tags-label">{c.hero.tagsLabel}</p>
+      <div class="tag-list">
+        {FORMAT_IDS.map((f) => (
+          <a class="tag" href="#configurador" data-format={f}>{c.hero.tags[f]}</a>
+        ))}
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 01 RECORRIDO -->
+<section id="recorrido">
+  <div class="wrap">
+    <p class="kicker reveal">{c.journey.kicker}</p>
+    <h2 class="reveal">{c.journey.h2} <span class="muted">{c.journey.h2Muted}</span></h2>
+    <p class="lead reveal">{c.journey.lead}</p>
+    <div class="flow-grid">
+      <div class="reveal">
+        <div class="seg" role="group" aria-label={c.journey.kicker}>
+          <button type="button" class="on" data-s="hoy">{c.journey.legend[0]}</button>
+          <button type="button" data-s="dsp">{c.journey.legend[1]}</button>
+        </div>
+        <div class="plan">
+          <svg id="plan" data-state="hoy" viewBox="0 0 800 380" role="img" aria-label={c.journey.h2}>
+            <rect x="10" y="10" width="780" height="360" rx="14" fill="#f6f5f1" stroke="#141414" stroke-opacity=".3"/>
+            <!-- zonas comunes -->
+            <rect x="20" y="160" width="120" height="90" rx="6" fill="#ebe9e2" stroke="#141414" stroke-opacity=".3"/>
+            <text class="lbl" x="30" y="150">{c.journey.plan.entrance}</text>
+            <rect x="200" y="110" width="260" height="60" rx="6" fill="#ebe9e2" stroke="#141414" stroke-opacity=".3"/>
+            <text class="lbl" x="212" y="102">{c.journey.plan.guided}</text>
+            <rect x="520" y="40" width="110" height="40" rx="6" fill="#ebe9e2" stroke="#141414" stroke-opacity=".3"/>
+            <text class="lbl" x="532" y="34">{c.journey.plan.pass}</text>
+            <rect x="520" y="170" width="110" height="50" rx="6" fill="#ebe9e2" stroke="#141414" stroke-opacity=".3"/>
+            <text class="lbl" x="532" y="162">{c.journey.plan.cashier}</text>
+            <rect x="650" y="80" width="130" height="240" rx="8" fill="#fff" stroke="#141414" stroke-opacity=".3"/>
+            <text class="lbl" x="662" y="72">{c.journey.plan.dining}</text>
+            <!-- solo rediseño: ritiro rápido -->
+            <g class="g-dsp">
+              <rect x="200" y="250" width="260" height="60" rx="6" fill="#c6ff3d" fill-opacity=".18" stroke="#141414" stroke-opacity=".4" stroke-dasharray="4 5"/>
+              <text class="lbl" x="212" y="242">{c.journey.plan.quick}</text>
+            </g>
+            <!-- recorridos hoy -->
+            <g class="g-hoy">
+              <path id="cHoy" d={PLAN_TODAY_PATHS.customers} fill="none" stroke="#141414" stroke-opacity=".45" stroke-width="2" stroke-dasharray="5 5"/>
+              <path id="sHoy" d={PLAN_TODAY_PATHS.staff} fill="none" stroke="#141414" stroke-width="2" stroke-dasharray="5 5"/>
+              <circle r="6" fill="#c6ff3d" stroke="#141414" stroke-width="2"><animateMotion dur="7s" repeatCount="indefinite"><mpath href="#cHoy"/></animateMotion></circle>
+              <circle r="6" fill="#c6ff3d" stroke="#141414" stroke-width="2"><animateMotion dur="7s" begin="3.5s" repeatCount="indefinite"><mpath href="#cHoy"/></animateMotion></circle>
+              <circle r="6" fill="#141414"><animateMotion dur="6s" repeatCount="indefinite"><mpath href="#sHoy"/></animateMotion></circle>
+              {HOTSPOTS_TODAY.map((h, i) => (
+                <g>
+                  <circle cx={h.x} cy={h.y} r="13" fill="#141414" fill-opacity=".25"><animate attributeName="r" values="13;21;13" dur="2.2s" repeatCount="indefinite"/></circle>
+                  <circle cx={h.x} cy={h.y} r="12" fill="#141414"/>
+                  <text x={h.x} y={h.y + 4.5} text-anchor="middle" font-size="13" font-weight="700" fill="#f6f5f1">{i + 1}</text>
+                </g>
+              ))}
+            </g>
+            <!-- recorridos rediseño -->
+            <g class="g-dsp">
+              <path id="cGuided" d={PLAN_REDESIGN_PATHS.guided} fill="none" stroke="#141414" stroke-opacity=".45" stroke-width="2" stroke-dasharray="5 5"/>
+              <path id="cQuick" d={PLAN_REDESIGN_PATHS.quick} fill="none" stroke="#141414" stroke-opacity=".45" stroke-width="2" stroke-dasharray="5 5"/>
+              <path id="sDsp" d={PLAN_REDESIGN_PATHS.staff} fill="none" stroke="#141414" stroke-width="2" stroke-dasharray="5 5"/>
+              <circle r="6" fill="#c6ff3d" stroke="#141414" stroke-width="2"><animateMotion dur="3.4s" repeatCount="indefinite"><mpath href="#cGuided"/></animateMotion></circle>
+              <circle r="6" fill="#c6ff3d" stroke="#141414" stroke-width="2"><animateMotion dur="4.6s" begin="1.2s" repeatCount="indefinite"><mpath href="#cQuick"/></animateMotion></circle>
+              <circle r="6" fill="#141414"><animateMotion dur="2.8s" repeatCount="indefinite"><mpath href="#sDsp"/></animateMotion></circle>
+              {HOTSPOTS_REDESIGN.map((h, i) => (
+                <g>
+                  <circle cx={h.x} cy={h.y} r="13" fill="#c6ff3d" fill-opacity=".45"><animate attributeName="r" values="13;21;13" dur="2.2s" repeatCount="indefinite"/></circle>
+                  <circle cx={h.x} cy={h.y} r="12" fill="#c6ff3d" stroke="#141414" stroke-width="1.5"/>
+                  <text x={h.x} y={h.y + 4.5} text-anchor="middle" font-size="13" font-weight="700" fill="#141414">{i + 1}</text>
+                </g>
+              ))}
+            </g>
+          </svg>
+        </div>
+        <p class="note">{c.journey.note}</p>
+      </div>
+      <div class="lists">
+        <ol class="step-list" data-s="hoy">
+          {c.journey.today.map((h, i) => (
+            <li><span class="num">{i + 1}</span><div><b>{h.t}</b><span class="d">{h.d}</span></div></li>
+          ))}
+        </ol>
+        <ol class="step-list ok" data-s="dsp" hidden>
+          {c.journey.redesign.map((h, i) => (
+            <li><span class="num lime">{i + 1}</span><div><b>{h.t}</b><span class="d">{h.d}</span></div></li>
+          ))}
+        </ol>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 02 ZONAS 3D -->
+<section id="zonas" class="zones-section">
+  <div class="wrap">
+    <p class="kicker reveal">{c.scene.kicker}</p>
+    <h2 class="reveal">{c.scene.h2} <span class="muted">{c.scene.h2Muted}</span></h2>
+    <p class="lead reveal">{c.scene.lead}</p>
+    <div class="scene-grid">
+      <div class="scene-wrap reveal" id="sceneWrap" data-active="journey">
+        <svg viewBox="0 0 520 400" role="img" aria-label={c.scene.h2} class="scene">
+          <polygon class="floor" points={scene.floor}/>
+          {scene.parts.map((p) => (
+            <g class:list={['part', `tone-${p.tone}`, p.zone && 'zone']} data-zone={p.zone}>
+              {p.faces.map((f) => <polygon class={`f-${f.kind}`} points={f.points}/>)}
+            </g>
+          ))}
+          <text class="sign-text" transform={scene.signTransform}>{scene.labels.sign}</text>
+          <text class="board-text" transform={scene.menuTransform}>{scene.labels.menu}</text>
+        </svg>
+      </div>
+      <div class="zone-side reveal">
+        <ul class="zone-list" role="list">
+          {ZONE_IDS.map((z) => (
+            <li>
+              <button type="button" class:list={['zone-btn', z === 'journey' && 'on']} data-zone={z} aria-pressed={z === 'journey' ? 'true' : 'false'}>
+                <span class="zn">{c.scene.zones[z].name}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+        <div class="zone-panel" aria-live="polite">
+          <p class="kicker" id="zoneName">{c.scene.zones.journey.name}</p>
+          <p class="zone-q" id="zoneQ">{c.scene.zones.journey.q}</p>
+          <p class="zone-a" id="zoneA">{c.scene.zones.journey.a}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 03 PRIORIDADES -->
+<section>
+  <div class="wrap">
+    <p class="kicker reveal">{c.priority.kicker}</p>
+    <h2 class="reveal">{c.priority.h2} <span class="muted">{c.priority.h2Muted}</span></h2>
+    <p class="lead reveal">{c.priority.lead}</p>
+    <ol class="priority-list reveal">
+      {c.priority.items.map((p, i) => (
+        <li><span class="pnum">{String(i + 1).padStart(2, '0')}</span><div><h3>{p.t}</h3><p>{p.d}</p></div></li>
+      ))}
+    </ol>
+    <div class="plan-notes reveal">
+      <p>{c.priority.measure}</p>
+      <p class="gate">{c.priority.gate}</p>
+    </div>
+    <p class="note">{c.priority.note}</p>
+  </div>
+</section>
+
+<!-- 04 CARTA POR CLIENTE -->
+<section id="menu">
+  <div class="wrap">
+    <p class="kicker reveal">{c.menu.kicker}</p>
+    <h2 class="reveal">{c.menu.h2} <span class="muted">{c.menu.h2Muted}</span></h2>
+    <p class="lead reveal">{c.menu.lead}</p>
+    <div class="menu-box">
+      <div class="reveal">
+        <ul class="target-list" id="targets" role="list">
+          {c.menu.targets.map((t) => (
+            <li>
+              <button type="button" class:list={['target-card', t.id === initialGroup.id && 'on']} data-t={t.id} aria-pressed={t.id === initialGroup.id ? 'true' : 'false'}>
+                <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" set:html={ICONS[t.icon]}/>
+                <span class="tl">{t.label}</span>
+                <span class="tk">{t.key}</span>
+              </button>
+            </li>
+          ))}
+        </ul>
+        <p class="changed"><span class="meta-tag">{c.menu.changed}</span> <span id="changedText">{c.menu.targets[0].key}</span></p>
+      </div>
+      <div class="carta reveal">
+        <div class="carta-t">{c.menu.cardTitle}</div>
+        <div id="dishes">
+          {initialGroup.order.map((id, i) => (
+            <div class:list={['dish', initialGroup.hl.includes(id) && 'hl', i >= initialGroup.order.length - 2 && 'dim']} data-id={id}>
+              <div><b>{c.menu.dishes[id].n}</b><small>{c.menu.dishes[id].d}</small></div>
+              <div class="pr">{DISH_PRICE[id]} €</div>
+            </div>
+          ))}
+        </div>
+        <p class="note">{c.menu.note}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 05 CONFIGURADOR -->
+<section id="configurador">
+  <div class="wrap">
+    <p class="kicker reveal">{c.scenario.kicker}</p>
+    <h2 class="reveal">{c.scenario.h2} <span class="muted">{c.scenario.h2Muted}</span></h2>
+    <p class="lead reveal">{c.scenario.lead}</p>
+    <div class="cfg">
+      <div class="cfg-controls reveal">
+        <fieldset class="group">
+          <legend>{c.scenario.labels.format}</legend>
+          <div class="chips" data-group="format">
+            {FORMAT_IDS.map((f) => (
+              <button type="button" class:list={[f === initial.format && 'on']} data-value={f} aria-pressed={f === initial.format ? 'true' : 'false'}>{c.scenario.formats[f]}</button>
+            ))}
+          </div>
+        </fieldset>
+        <fieldset class="group">
+          <legend>{c.scenario.labels.price}</legend>
+          <div class="chips" data-group="price">
+            {PRICE_IDS.map((p) => (
+              <button type="button" class:list={[p === initial.price && 'on']} data-value={String(p)} aria-pressed={p === initial.price ? 'true' : 'false'}>{c.scenario.prices[String(p) as '1' | '2' | '3']}</button>
+            ))}
+          </div>
+        </fieldset>
+        <fieldset class="group">
+          <legend>{c.scenario.labels.location}</legend>
+          <div class="chips" data-group="location">
+            {LOCATION_IDS.map((l) => (
+              <button type="button" class:list={[l === initial.location && 'on']} data-value={l} aria-pressed={l === initial.location ? 'true' : 'false'}>{c.scenario.locations[l]}</button>
+            ))}
+          </div>
+        </fieldset>
+        <fieldset class="group">
+          <legend>{c.scenario.labels.target}</legend>
+          <div class="chips" data-group="target">
+            {TARGET_IDS.map((t) => (
+              <button type="button" class:list={[t === initial.target && 'on']} data-value={t} aria-pressed={t === initial.target ? 'true' : 'false'}>{c.scenario.targets[t]}</button>
+            ))}
+          </div>
+        </fieldset>
+      </div>
+      <div class="cfg-out reveal" id="cfgOut">
+        <div class="score">
+          <span class="meta-tag">{c.scenario.outputs.score}</span>
+          <div class="bar"><i id="scoreBar" style={`width:${initialResult.score}%`}></i></div>
+          <b id="scoreVal">{initialResult.score}/100</b>
+        </div>
+        <ul class="msgs" id="msgs"></ul>
+        <div class="metrics">
+          <div><span>{c.scenario.outputs.covers}</span><b id="mCovers">{initialResult.covers}</b></div>
+          <div><span>{c.scenario.outputs.turns}</span><b id="mTurns">{initialResult.turns}</b></div>
+          <div><span>{c.scenario.outputs.ticket}</span><b id="mTicket">{initialResult.ticket} €</b></div>
+          <div><span>{c.scenario.outputs.monthly}</span><b id="mMonthly">{initialResult.monthly} €</b></div>
+        </div>
+        <p class="note">{c.scenario.note}</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 06 DMADV -->
+<section id="metodo">
+  <div class="wrap">
+    <p class="kicker reveal">{c.method.kicker}</p>
+    <h2 class="reveal">{c.method.h2} <span class="muted">{c.method.h2Muted}</span></h2>
+    <p class="lead reveal">{c.method.lead}</p>
+    <ol class="phases">
+      {c.method.phases.map((p, i) => (
+        <li class="phase reveal" style={`--delay:${i * 90}ms`}>
+          <span class="letter">{p.k}</span>
+          <h3>{p.t}</h3>
+          <p class="what">{p.what}</p>
+          <p class="gets"><span class="meta-tag">→</span> {p.gets}</p>
+          <p class="tools"><span class="meta-tag">{c.method.toolsLabel}</span> {p.tools}</p>
+        </li>
+      ))}
+    </ol>
+    <p class="note reveal">{c.method.note}</p>
+  </div>
+</section>
+
+<!-- 07 CASO -->
+<section id="caso" class="case">
+  <div class="wrap">
+    <p class="kicker reveal">{c.case.kicker}</p>
+    <h2 class="reveal">{c.case.h2} <span class="muted">{c.case.h2Muted}</span></h2>
+    <div class="case-story">
+      <div class="reveal">
+        <p class="case-label">{c.case.labels.problem}</p>
+        <p>{c.case.problem}</p>
+        <p class="case-label">{c.case.labels.did}</p>
+        <p>{c.case.did}</p>
+        <p class="case-label">{c.case.labels.status}</p>
+        <p>{c.case.status}</p>
+        <p class="note">{c.case.method}</p>
+        <a class="cta" href={caseHref}>{c.case.cta}</a>
+      </div>
+      <table class="kpi-table reveal">
+        <tbody>
+          {c.case.kpis.map((k) => (
+            <tr><th scope="row">{k.label}</th><td>{k.base}</td><td class="arrow">→</td><td class="target">{k.target}</td></tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- 08 QUIÉN SOY -->
+<section>
+  <div class="wrap">
+    <p class="kicker reveal">{c.about.kicker}</p>
+    <h2 class="reveal">{c.about.h2} <span class="muted">{c.about.h2Muted}</span></h2>
+    <div class="about">
+      <p class="lead reveal">{c.about.lead}</p>
+      <ul class="kv reveal">
+        {c.about.rows.map((r) => (
+          <li><span>{r.k}</span><span>{r.v}</span></li>
+        ))}
+        <li><span>Portfolio</span><span><a href={`/${lang}/projects/`}>{c.about.portfolio}</a></span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 09 FAQ -->
+<section>
+  <div class="wrap">
+    <p class="kicker reveal">{c.faq.kicker}</p>
+    <h2 class="reveal">{c.faq.h2}</h2>
+    <div class="reveal">
+      {c.faq.items.map((f) => (
+        <details>
+          <summary>{f.q}</summary>
+          <p>{f.a}</p>
+        </details>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- 10 CONTACTO -->
+<section class="contact">
+  <div class="wrap contact-band">
+    <div>
+      <p class="kicker reveal">{c.contact.kicker}</p>
+      <h2 class="reveal">{c.contact.h2} <span class="muted">{c.contact.h2Muted}</span></h2>
+      <p class="lead reveal">{c.contact.lead}</p>
+      <div class="links-row reveal">
+        <a href="https://www.linkedin.com/in/adrianoparmentola/" target="_blank" rel="noopener">{c.contact.linkedin}</a>
+        <a href="https://www.instagram.com/adriano_parmentola/" target="_blank" rel="noopener">{c.contact.instagram}</a>
+      </div>
+    </div>
+    <div class="reveal">
+      <a class="cta primary" id="mailBtn" href={`mailto:adrianoparmentola03@gmail.com?subject=${encodeURIComponent(c.contact.subject)}`}>{c.contact.cta}</a>
+      <p class="note">adrianoparmentola03@gmail.com</p>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>{c.footer}</span>
+  <span>© Adriano Parmentola</span>
+</footer>
+
+<script is:inline type="application/json" id="method-data" set:html={JSON.stringify(clientData)}></script>
+
+</div>
+
+<style>
+  .wrap {
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: 0 var(--space-4);
+  }
+  section {
+    padding: var(--space-12) 0;
+    border-top: 1px solid var(--color-border);
+  }
+  .hero {
+    border-top: 0;
+    padding-top: var(--space-8);
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: var(--text-h3);
+    font-weight: var(--weight-bold);
+    letter-spacing: -0.01em;
+    margin-bottom: var(--space-1);
+  }
+  .dot {
+    width: 0.6rem;
+    height: 0.6rem;
+    border-radius: 50%;
+    background: var(--color-accent);
+    box-shadow: 0 0 0 0 rgb(198 255 61 / 0.7);
+    animation: breathe 2.6s ease-out infinite;
+  }
+  @keyframes breathe {
+    70% {
+      box-shadow: 0 0 0 0.6rem rgb(198 255 61 / 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgb(198 255 61 / 0);
+    }
+  }
+  .kicker {
+    font-size: var(--text-meta);
+    font-weight: var(--weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-2);
+  }
+  h1,
+  h2,
+  h3 {
+    font-weight: var(--weight-bold);
+    line-height: 1.05;
+    margin: 0;
+  }
+  h1 {
+    font-size: var(--text-h1);
+    letter-spacing: -0.03em;
+    line-height: 0.98;
+    margin-bottom: var(--space-3);
+  }
+  h2 {
+    font-size: var(--text-h2);
+    letter-spacing: -0.02em;
+    max-width: 18ch;
+    margin-bottom: var(--space-2);
+  }
+  h3 {
+    font-size: var(--text-h3);
+    letter-spacing: -0.01em;
+  }
+  .muted {
+    color: var(--color-text-muted);
+  }
+  .lead {
+    font-size: var(--text-h3);
+    color: var(--color-text-muted);
+    max-width: 46ch;
+    line-height: 1.3;
+  }
+  .note {
+    font-size: var(--text-meta);
+    color: var(--color-text-muted);
+    margin-top: var(--space-2);
+  }
+  .meta-tag {
+    font-size: var(--text-meta);
+    font-weight: var(--weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-muted);
+  }
+
+  /* botones */
+  .cta {
+    display: inline-block;
+    font-weight: var(--weight-bold);
+    border: 1px solid var(--color-text);
+    padding: 0.75rem 1.5rem;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--color-text);
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.2s;
+  }
+  .cta:hover {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-text);
+    transform: translateY(-2px);
+  }
+  .cta.primary {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-text);
+  }
+  .cta-row {
+    display: flex;
+    gap: var(--space-1);
+    flex-wrap: wrap;
+  }
+
+  /* hero */
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 0.9fr;
+    gap: var(--space-6);
+    align-items: center;
+  }
+  .hero .lead {
+    margin-bottom: var(--space-4);
+  }
+  .tags {
+    border: 1px solid var(--color-border);
+    border-radius: 1.25rem;
+    padding: var(--space-4);
+    background: #fff;
+  }
+  .tags .kicker {
+    margin-bottom: var(--space-2);
+  }
+  .tag-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+  }
+  .tag {
+    font-size: 0.95rem;
+    font-weight: var(--weight-bold);
+    border: 1px solid var(--color-text);
+    border-radius: 999px;
+    padding: 0.55rem 1rem;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
+  }
+  .tag:hover {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-text);
+  }
+  .tags .note {
+    margin-top: var(--space-3);
+  }
+
+  /* 01 recorrido */
+  .flow-grid {
+    display: grid;
+    grid-template-columns: 1.5fr 1fr;
+    gap: var(--space-4);
+    margin-top: var(--space-4);
+    align-items: start;
+  }
+  .seg {
+    display: inline-flex;
+    border: 1px solid var(--color-text);
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: var(--space-2);
+  }
+  .seg button {
+    font-size: var(--text-meta);
+    font-weight: var(--weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.55rem 1.1rem;
+    border: 0;
+    background: transparent;
+    color: var(--color-text);
+    cursor: pointer;
+  }
+  .seg button.on {
+    background: var(--color-text);
+    color: var(--color-bg);
+  }
+  .plan {
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    padding: var(--space-1);
+  }
+  .plan svg {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .lbl {
+    font-size: 11px;
+    fill: var(--color-text-muted);
+    letter-spacing: 0.08em;
+  }
+  .g-hoy,
+  .g-dsp {
+    display: none;
+  }
+  svg[data-state='hoy'] .g-hoy {
+    display: inline;
+  }
+  svg[data-state='dsp'] .g-dsp {
+    display: inline;
+  }
+  .step-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .step-list li {
+    display: grid;
+    grid-template-columns: 32px 1fr;
+    gap: var(--space-2);
+    padding: var(--space-2) 0;
+    border-top: 1px solid var(--color-border);
+  }
+  .step-list li:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+  .num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--color-text);
+    color: var(--color-bg);
+    font-size: 13px;
+    font-weight: var(--weight-bold);
+    display: grid;
+    place-items: center;
+  }
+  .num.lime {
+    background: var(--color-accent);
+    color: var(--color-text);
+  }
+  .step-list b {
+    display: block;
+    font-size: var(--text-h3);
+    font-weight: var(--weight-bold);
+    letter-spacing: -0.01em;
+  }
+  .step-list .d {
+    font-size: 0.95rem;
+    color: var(--color-text-muted);
+  }
+
+  /* 02 zonas 3D */
+  .scene-grid {
+    display: grid;
+    grid-template-columns: 1.3fr 1fr;
+    gap: var(--space-4);
+    margin-top: var(--space-4);
+    align-items: center;
+  }
+  .scene-wrap {
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: 18px;
+    padding: var(--space-2);
+  }
+  .scene {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  .scene .floor {
+    fill: #ece9e1;
+    stroke: #141414;
+    stroke-opacity: 0.25;
+    stroke-width: 0.6;
+  }
+  .scene polygon {
+    stroke: #141414;
+    stroke-opacity: 0.25;
+    stroke-width: 0.6;
+    stroke-linejoin: round;
+    transition: fill 0.35s, opacity 0.35s;
+  }
+  .part {
+    transition: opacity 0.35s;
+  }
+  .f-top {
+    fill: #ffffff;
+  }
+  .f-x {
+    fill: #e8e5dc;
+  }
+  .f-y {
+    fill: #d6d2c6;
+  }
+  .tone-glass .f-top {
+    fill: #dfeef0;
+  }
+  .tone-glass .f-x {
+    fill: #cfe3e7;
+  }
+  .tone-glass .f-y {
+    fill: #bfd6db;
+  }
+  .tone-dark .f-top {
+    fill: #4a4844;
+  }
+  .tone-dark .f-x {
+    fill: #36352f;
+  }
+  .tone-dark .f-y {
+    fill: #2a2925;
+  }
+  .tone-wood .f-top {
+    fill: #c9a57a;
+  }
+  .tone-wood .f-x {
+    fill: #b48d5f;
+  }
+  .tone-wood .f-y {
+    fill: #a07a4d;
+  }
+  .tone-chair .f-top {
+    fill: #6b655d;
+  }
+  .tone-chair .f-x {
+    fill: #55514a;
+  }
+  .tone-chair .f-y {
+    fill: #45413b;
+  }
+  .tone-plant .f-top {
+    fill: #6f8f55;
+  }
+  .tone-plant .f-x {
+    fill: #5a7746;
+  }
+  .tone-plant .f-y {
+    fill: #4a6438;
+  }
+  .tone-food .f-top {
+    fill: #f0b65a;
+  }
+  .tone-food .f-x {
+    fill: #d89a40;
+  }
+  .tone-food .f-y {
+    fill: #c28632;
+  }
+  .tone-light .f-top {
+    fill: #fff6d6;
+  }
+  .tone-light .f-x {
+    fill: #efe2b4;
+  }
+  .tone-light .f-y {
+    fill: #e0d19e;
+  }
+  .tone-board .f-top {
+    fill: #2b2d2a;
+  }
+  .tone-board .f-x {
+    fill: #222422;
+  }
+  .tone-board .f-y {
+    fill: #1a1b19;
+  }
+  .sign-text {
+    fill: #c6ff3d;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    font-family: var(--font-family);
+  }
+  .board-text {
+    fill: #f6f5f1;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    font-family: var(--font-family);
+  }
+  .tone-person .f-top {
+    fill: #141414;
+  }
+  .tone-person .f-x {
+    fill: #2c2c2c;
+  }
+  .tone-person .f-y {
+    fill: #1f1f1f;
+  }
+  .scene-wrap[data-active] .part.zone:not(.is-active) {
+    opacity: 0.35;
+  }
+  .part.is-active .f-top {
+    fill: #c6ff3d;
+  }
+  .part.is-active .f-x {
+    fill: #a9e62a;
+  }
+  .part.is-active .f-y {
+    fill: #93cc1f;
+  }
+  .zone-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-1);
+  }
+  .zone-btn {
+    width: 100%;
+    text-align: left;
+    font: inherit;
+    font-size: 0.95rem;
+    font-weight: var(--weight-bold);
+    padding: 0.6rem 0.9rem;
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    background: #fff;
+    color: var(--color-text);
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .zone-btn:hover,
+  .zone-btn.on {
+    border-color: var(--color-accent);
+    background: color-mix(in srgb, var(--color-accent) 30%, #fff);
+  }
+  .zone-panel {
+    margin-top: var(--space-3);
+    border-left: 3px solid var(--color-accent);
+    padding: var(--space-1) var(--space-2);
+    min-height: 9rem;
+  }
+  .zone-q {
+    font-size: var(--text-h3);
+    font-weight: var(--weight-bold);
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+    margin: 0.4rem 0 var(--space-2);
+  }
+  .zone-a {
+    color: var(--color-text-muted);
+    max-width: 48ch;
+  }
+
+  /* 03 prioridades */
+  .priority-list {
+    list-style: none;
+    padding: 0;
+    margin: var(--space-4) 0 0;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3) var(--space-6);
+  }
+  .priority-list li {
+    display: grid;
+    grid-template-columns: 3.5rem 1fr;
+    gap: var(--space-2);
+    border-top: 2px solid var(--color-text);
+    padding-top: var(--space-2);
+  }
+  .pnum {
+    font-size: var(--text-h3);
+    font-weight: var(--weight-bold);
+    color: var(--color-text-muted);
+  }
+  .priority-list h3 {
+    margin-bottom: 0.4rem;
+  }
+  .priority-list p {
+    color: var(--color-text-muted);
+  }
+  .plan-notes {
+    margin-top: var(--space-4);
+    padding: var(--space-2) var(--space-3);
+    border-left: 3px solid var(--color-accent);
+    background: #fff;
+    border-radius: 0 14px 14px 0;
+    max-width: 60ch;
+  }
+  .plan-notes p {
+    color: var(--color-text-muted);
+  }
+  .plan-notes .gate {
+    margin-top: var(--space-1);
+    color: var(--color-text);
+    font-weight: var(--weight-bold);
+  }
+
+  /* 04 carta */
+  .menu-box {
+    display: grid;
+    grid-template-columns: 1fr 1.05fr;
+    gap: var(--space-6);
+    margin-top: var(--space-4);
+    align-items: start;
+  }
+  .target-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: var(--space-1);
+  }
+  .target-card {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 2.2rem 1fr;
+    grid-template-areas: 'icon label' 'icon key';
+    column-gap: var(--space-2);
+    row-gap: 0.1rem;
+    text-align: left;
+    font: inherit;
+    padding: var(--space-2);
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    background: #fff;
+    color: var(--color-text);
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .target-card:hover {
+    border-color: var(--color-text);
+  }
+  .target-card.on {
+    border-color: var(--color-text);
+    background: color-mix(in srgb, var(--color-accent) 45%, #fff);
+  }
+  .target-card .icon {
+    grid-area: icon;
+    width: 2rem;
+    height: 2rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.6;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    align-self: center;
+  }
+  .target-card .tl {
+    grid-area: label;
+    font-size: var(--text-meta);
+    font-weight: var(--weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--color-text-muted);
+  }
+  .target-card .tk {
+    grid-area: key;
+    font-size: 1.1rem;
+    font-weight: var(--weight-bold);
+    letter-spacing: -0.01em;
+    line-height: 1.25;
+  }
+  .changed {
+    margin-top: var(--space-2);
+    font-size: 1rem;
+    color: var(--color-text);
+  }
+  .carta {
+    background: #fff;
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    padding: var(--space-3) var(--space-3) var(--space-1);
+  }
+  .carta-t {
+    text-align: center;
+    font-size: var(--text-meta);
+    font-weight: var(--weight-bold);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--color-text);
+    padding-bottom: var(--space-2);
+    margin-bottom: var(--space-1);
+  }
+  .dish {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-2);
+    padding: 0.9rem 0.5rem;
+    border-bottom: 1px solid var(--color-border);
+    border-radius: 6px;
+    transition: opacity 0.4s, background 0.4s;
+  }
+  .dish b {
+    font-size: var(--text-h3);
+    font-weight: var(--weight-bold);
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+  }
+  .dish small {
+    display: block;
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+  }
+  .dish .pr {
+    font-size: 0.95rem;
+    font-weight: var(--weight-bold);
+    white-space: nowrap;
+  }
+  .dish.hl {
+    background: color-mix(in srgb, var(--color-accent) 40%, #fff);
+  }
+  .dish.hl b::after {
+    content: '★';
+    margin-left: 0.5rem;
+    font-size: 0.9rem;
+  }
+  .dish.dim {
+    opacity: 0.35;
+  }
+
+  /* 05 configurador */
+  .cfg {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: var(--space-6);
+    margin-top: var(--space-4);
+    align-items: start;
+  }
+  .group {
+    border: 0;
+    padding: 0;
+    margin: 0 0 var(--space-3);
+    min-width: 0;
+  }
+  .group legend {
+    font-size: var(--text-meta);
+    font-weight: var(--weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-muted);
+    margin-bottom: var(--space-1);
+    padding: 0;
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+  }
+  .chips button {
+    font: inherit;
+    font-size: 0.95rem;
+    padding: 0.5rem 0.95rem;
+    border: 1px solid var(--color-text);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--color-text);
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+  }
+  .chips button:hover {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+  }
+  .chips button.on {
+    background: var(--color-text);
+    color: var(--color-bg);
+  }
+  .cfg-out {
+    background: var(--color-text);
+    color: var(--color-bg);
+    border-radius: 1.25rem;
+    padding: var(--space-4);
+  }
+  .score {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: var(--space-1);
+    align-items: center;
+  }
+  .score .meta-tag {
+    grid-column: 1 / -1;
+    color: rgb(246 245 241 / 0.65);
+  }
+  .score .bar {
+    height: 8px;
+    border-radius: 6px;
+    background: rgb(246 245 241 / 0.15);
+    overflow: hidden;
+  }
+  .score .bar i {
+    display: block;
+    height: 100%;
+    background: var(--color-accent);
+    transition: width 0.4s;
+  }
+  .score b {
+    color: var(--color-accent);
+    font-size: var(--text-h3);
+  }
+  .msgs {
+    list-style: none;
+    padding: 0;
+    margin: var(--space-3) 0;
+    display: grid;
+    gap: var(--space-1);
+    min-height: 4rem;
+  }
+  .msgs li {
+    font-size: 1rem;
+    padding-left: 1.4rem;
+    position: relative;
+  }
+  .msgs li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.5em;
+    width: 0.7rem;
+    height: 0.7rem;
+    border-radius: 50%;
+    background: var(--color-accent);
+  }
+  .msgs li.warn::before {
+    background: transparent;
+    border: 2px solid var(--color-accent);
+  }
+  .metrics {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-2);
+    border-top: 1px solid rgb(246 245 241 / 0.18);
+    padding-top: var(--space-3);
+  }
+  .metrics span {
+    display: block;
+    font-size: var(--text-meta);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: rgb(246 245 241 / 0.65);
+  }
+  .metrics b {
+    font-size: clamp(1.6rem, 1.3rem + 1vw, 2.2rem);
+    font-weight: var(--weight-bold);
+    letter-spacing: -0.02em;
+  }
+  .cfg-out .note {
+    color: rgb(246 245 241 / 0.6);
+  }
+
+  /* 06 DMADV */
+  .phases {
+    list-style: none;
+    padding: 0;
+    margin: var(--space-4) 0 0;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: var(--space-2);
+  }
+  .phase {
+    border-top: 2px solid var(--color-text);
+    padding-top: var(--space-2);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+  }
+  .letter {
+    font-size: clamp(3rem, 2.4rem + 2vw, 5rem);
+    font-weight: var(--weight-bold);
+    letter-spacing: -0.04em;
+    line-height: 0.9;
+    color: var(--color-accent);
+    -webkit-text-stroke: 1px var(--color-text);
+  }
+  .phase h3 {
+    font-size: var(--text-h3);
+  }
+  .phase .what {
+    color: var(--color-text-muted);
+    font-size: 0.98rem;
+  }
+  .phase .gets {
+    font-size: 0.98rem;
+    margin-top: auto;
+    padding-top: var(--space-1);
+    border-top: 1px solid var(--color-border);
+  }
+  .phase .gets .meta-tag {
+    margin-right: 0.3rem;
+  }
+  .phase .tools {
+    font-size: 0.92rem;
+    color: var(--color-text-muted);
+  }
+  .phase .tools .meta-tag {
+    display: block;
+    margin-bottom: 0.2rem;
+  }
+
+  /* 07 caso */
+  .case {
+    background: var(--color-text);
+    color: var(--color-bg);
+    border-top: 0;
+  }
+  .case .kicker,
+  .case .muted,
+  .case .note {
+    color: rgb(246 245 241 / 0.65);
+  }
+  .case-story {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: var(--space-6);
+    margin-top: var(--space-4);
+    align-items: start;
+  }
+  .case-label {
+    font-size: var(--text-meta);
+    font-weight: var(--weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-accent);
+    margin: var(--space-3) 0 0.3rem;
+  }
+  .case-label:first-child {
+    margin-top: 0;
+  }
+  .case-story p:not(.note):not(.case-label) {
+    font-size: 1.1rem;
+    max-width: 48ch;
+  }
+  .case .cta {
+    margin-top: var(--space-3);
+    border-color: var(--color-bg);
+    color: var(--color-bg);
+  }
+  .case .cta:hover {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-text);
+  }
+  .kpi-table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  .kpi-table th,
+  .kpi-table td {
+    text-align: left;
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid rgb(246 245 241 / 0.18);
+    font-size: 1rem;
+  }
+  .kpi-table th {
+    font-weight: var(--weight-bold);
+    color: rgb(246 245 241 / 0.75);
+  }
+  .kpi-table td {
+    font-weight: var(--weight-bold);
+  }
+  .kpi-table .arrow {
+    color: rgb(246 245 241 / 0.5);
+    width: 2rem;
+  }
+  .kpi-table .target {
+    color: var(--color-accent);
+    text-align: right;
+  }
+
+  /* 08 quién soy */
+  .about {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-6);
+    margin-top: var(--space-4);
+  }
+  .kv {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  .kv li {
+    display: grid;
+    grid-template-columns: 9rem 1fr;
+    gap: var(--space-2);
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--color-border);
+    font-size: 1rem;
+  }
+  .kv li span:first-child {
+    font-size: var(--text-meta);
+    font-weight: var(--weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--color-text-muted);
+    padding-top: 0.15rem;
+  }
+
+  /* 09 faq */
+  details {
+    border-top: 1px solid var(--color-border);
+    padding: var(--space-2) 0;
+  }
+  details:last-of-type {
+    border-bottom: 1px solid var(--color-border);
+  }
+  summary {
+    font-size: var(--text-h3);
+    font-weight: var(--weight-bold);
+    letter-spacing: -0.01em;
+    cursor: pointer;
+    list-style: none;
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  summary::after {
+    content: '+';
+    font-weight: 300;
+    font-size: var(--text-h3);
+    line-height: 1;
+  }
+  details[open] summary::after {
+    content: '–';
+  }
+  details p {
+    margin-top: var(--space-1);
+    color: var(--color-text-muted);
+    max-width: 70ch;
+  }
+
+  /* 10 contacto */
+  .contact-band {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    flex-wrap: wrap;
+    border-top: 1px solid var(--color-text);
+  }
+  .contact h2 {
+    font-size: var(--text-h1);
+    letter-spacing: -0.02em;
+    max-width: 14ch;
+    margin-bottom: 0;
+  }
+  .contact .lead {
+    margin: var(--space-2) 0 var(--space-3);
+  }
+  .links-row {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+    margin-top: var(--space-2);
+  }
+  .links-row a {
+    font-size: var(--text-meta);
+    font-weight: var(--weight-bold);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-bottom: 1px solid currentColor;
+    padding-bottom: 2px;
+  }
+  .links-row a:hover {
+    color: var(--color-accent);
+  }
+  footer {
+    max-width: var(--content-max-width);
+    margin: 0 auto;
+    padding: var(--space-3) var(--space-4) var(--space-6);
+    border-top: 1px solid var(--color-border);
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+    font-size: var(--text-meta);
+    color: var(--color-text-muted);
+  }
+
+  @media (max-width: 900px) {
+    .hero-grid,
+    .flow-grid,
+    .scene-grid,
+    .menu-box,
+    .cfg,
+    .case-story,
+    .about {
+      grid-template-columns: 1fr;
+    }
+    .phases {
+      grid-template-columns: 1fr;
+    }
+    .priority-list {
+      grid-template-columns: 1fr;
+    }
+    section {
+      padding: var(--space-8) 0;
+    }
+  }
+  @media (max-width: 560px) {
+    .wrap {
+      padding: 0 16px;
+    }
+    .zone-list {
+      grid-template-columns: 1fr;
+    }
+    .metrics {
+      grid-template-columns: 1fr;
+    }
+    .kv li {
+      grid-template-columns: 1fr;
+      gap: 0.2rem;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .dot {
+      animation: none;
+    }
+    .part,
+    .scene polygon,
+    .score .bar i {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  // Tutta la parte dinamica: recorrido, zone 3D, carta, configuratore, tag.
+  import { evaluate, type Choice, type FormatId, type LocationId, type PriceId, type TargetId } from '../lib/method-scenario';
+
+  type ClientData = {
+    zones: string[];
+    scenario: {
+      rules: Record<string, string>;
+      neutral: string;
+      formats: Record<string, string>;
+      prices: Record<string, string>;
+      locations: Record<string, string>;
+      targets: Record<string, string>;
+      initial: Choice;
+    };
+    menu: {
+      groups: { id: string; t: string; d: string; k: string; order: string[]; hl: string[]; l: string }[];
+      dishes: Record<string, { n: string; d: string; p: number }>;
+      targetKeys: Record<string, string>;
+    };
+    zoneText: Record<string, { name: string; q: string; a: string }>;
+  };
+
+  function initMethod() {
+    const root = document.querySelector<HTMLElement>('[data-method]');
+    const dataEl = document.getElementById('method-data');
+    if (!root || !dataEl) return;
+    const data = JSON.parse(dataEl.textContent ?? '{}') as ClientData;
+    const locale = root.dataset.locale ?? 'es-ES';
+    const money = (n: number) =>
+      new Intl.NumberFormat(locale, { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(n);
+
+    // 01 recorrido: hoy / rediseño
+    const plan = document.getElementById('plan');
+    const seg = root.querySelector<HTMLElement>('.seg');
+    if (seg && plan) {
+      const btns = seg.querySelectorAll<HTMLButtonElement>('button');
+      btns.forEach((b) =>
+        b.addEventListener('click', () => {
+          const s = b.dataset.s ?? 'hoy';
+          plan.setAttribute('data-state', s);
+          btns.forEach((x) => x.classList.toggle('on', x === b));
+          root.querySelectorAll<HTMLElement>('.step-list').forEach((l) => {
+            l.hidden = l.dataset.s !== s;
+          });
+        })
+      );
+    }
+
+    // 02 zonas 3D
+    const sceneWrap = document.getElementById('sceneWrap');
+    const zoneBtns = root.querySelectorAll<HTMLButtonElement>('.zone-btn');
+    const setZone = (z: string) => {
+      const t = data.zoneText[z];
+      if (!t || !sceneWrap) return;
+      sceneWrap.setAttribute('data-active', z);
+      sceneWrap.querySelectorAll<HTMLElement>('.part.zone').forEach((p) => {
+        p.classList.toggle('is-active', p.dataset.zone === z);
+      });
+      zoneBtns.forEach((b) => {
+        const on = b.dataset.zone === z;
+        b.classList.toggle('on', on);
+        b.setAttribute('aria-pressed', String(on));
+      });
+      const name = document.getElementById('zoneName');
+      const q = document.getElementById('zoneQ');
+      const a = document.getElementById('zoneA');
+      if (name) name.textContent = t.name;
+      if (q) q.textContent = t.q;
+      if (a) a.textContent = t.a;
+    };
+    zoneBtns.forEach((b) => b.addEventListener('click', () => setZone(b.dataset.zone ?? 'journey')));
+    sceneWrap?.querySelectorAll<SVGGElement>('.part.zone').forEach((p) => {
+      p.addEventListener('mouseenter', () => setZone(p.dataset.zone ?? 'journey'));
+      p.addEventListener('click', () => setZone(p.dataset.zone ?? 'journey'));
+    });
+    setZone('journey');
+
+    // 04 carta por cliente
+    const box = document.getElementById('dishes');
+    const targets = root.querySelectorAll<HTMLButtonElement>('.target-card');
+    const changedText = document.getElementById('changedText');
+    let tgt = data.menu.groups[0].id;
+    const dishEls = new Map<string, HTMLElement>();
+    box?.querySelectorAll<HTMLElement>('.dish').forEach((el) => dishEls.set(el.dataset.id ?? '', el));
+
+    function renderDishes(animate: boolean) {
+      const g = data.menu.groups.find((x) => x.id === tgt);
+      if (!g || !box) return;
+      const first = new Map<string, number>();
+      dishEls.forEach((el, id) => first.set(id, el.getBoundingClientRect().top));
+      g.order.forEach((id, i) => {
+        const el = dishEls.get(id);
+        if (!el) return;
+        el.classList.toggle('hl', g.hl.includes(id));
+        el.classList.toggle('dim', i >= g.order.length - 2);
+        box.appendChild(el);
+      });
+      if (animate) {
+        g.order.forEach((id) => {
+          const el = dishEls.get(id);
+          if (!el) return;
+          const dy = (first.get(id) ?? 0) - el.getBoundingClientRect().top;
+          if (!dy) return;
+          el.style.transition = 'none';
+          el.style.transform = `translateY(${dy}px)`;
+          requestAnimationFrame(() =>
+            requestAnimationFrame(() => {
+              el.style.transition = 'transform .6s cubic-bezier(.2,.7,.2,1), opacity .4s, background .4s';
+              el.style.transform = '';
+            })
+          );
+        });
+      }
+      targets.forEach((b) => {
+        const on = b.dataset.t === tgt;
+        b.classList.toggle('on', on);
+        b.setAttribute('aria-pressed', String(on));
+      });
+      if (changedText) changedText.textContent = data.menu.targetKeys[tgt] ?? '';
+    }
+    targets.forEach((b) =>
+      b.addEventListener('click', () => {
+        tgt = b.dataset.t ?? tgt;
+        renderDishes(true);
+      })
+    );
+
+    // 05 configuratore
+    const choice: Choice = { ...data.scenario.initial };
+    const setChip = (group: string, value: string) => {
+      root.querySelectorAll<HTMLButtonElement>(`[data-group="${group}"] button`).forEach((b) => {
+        const on = b.dataset.value === value;
+        b.classList.toggle('on', on);
+        b.setAttribute('aria-pressed', String(on));
+      });
+    };
+    const renderScenario = () => {
+      const r = evaluate(choice);
+      const bar = document.getElementById('scoreBar');
+      if (bar) bar.style.width = `${r.score}%`;
+      const val = document.getElementById('scoreVal');
+      if (val) val.textContent = `${r.score}/100`;
+      const msgs = document.getElementById('msgs');
+      if (msgs) {
+        const items = r.matched.length
+          ? r.matched.map((m) => `<li class="${m.level}">${data.scenario.rules[m.id]}</li>`)
+          : [`<li>${data.scenario.neutral}</li>`];
+        msgs.innerHTML = items.join('');
+      }
+      const set = (id: string, v: string) => {
+        const el = document.getElementById(id);
+        if (el) el.textContent = v;
+      };
+      set('mCovers', String(r.covers));
+      set('mTurns', String(r.turns));
+      set('mTicket', `${r.ticket} €`);
+      set('mMonthly', money(r.monthly));
+    };
+    const setValue = (group: string, value: string) => {
+      if (group === 'format') choice.format = value as FormatId;
+      if (group === 'price') choice.price = Number(value) as PriceId;
+      if (group === 'location') choice.location = value as LocationId;
+      if (group === 'target') choice.target = value as TargetId;
+      setChip(group, value);
+      renderScenario();
+    };
+    root.querySelectorAll<HTMLButtonElement>('[data-group] button').forEach((b) =>
+      b.addEventListener('click', () => {
+        const group = b.parentElement?.dataset.group ?? '';
+        setValue(group, b.dataset.value ?? '');
+      })
+    );
+    // tag del hero: preselecciona el formato y lleva al configuratore
+    root.querySelectorAll<HTMLAnchorElement>('.tag').forEach((a) =>
+      a.addEventListener('click', () => {
+        const f = a.dataset.format;
+        if (f) setValue('format', f);
+      })
+    );
+    renderScenario();
+  }
+
+  initMethod();
+  document.addEventListener('astro:page-load', initMethod);
+</script>
