@@ -75,6 +75,13 @@
   box-sizing: border-box;
 }
 
+html {
+  /* Safari su iPhone ingrandisce da solo il testo di alcuni blocchi: con la
+     barra fatta di una lettera per elemento il risultato è illeggibile */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
 html,
 body {
   margin: 0;
