@@ -13,7 +13,8 @@
     "extract-pdfs": "node scripts/extract-pdfs.mjs",
     "compress-videos": "node scripts/compress-videos.mjs",
     "pdf": "node pdf/build.mjs",
-    "cv": "node cv/build-cv.mjs"
+    "cv": "node cv/build-cv.mjs",
+    "social-card": "node scripts/social-card.mjs"
   },
   "dependencies": {
     "@google/model-viewer": "^4.0.0",

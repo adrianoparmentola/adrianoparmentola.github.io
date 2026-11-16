@@ -2,7 +2,7 @@
 import { ClientRouter } from 'astro:transitions';
 import '../styles/tokens.css';
 import Nav from '../components/Nav.astro';
-import type { Lang } from '../i18n/ui';
+import { useTranslations, type Lang } from '../i18n/ui';
 
 interface Props {
   lang: Lang;
@@ -10,6 +10,16 @@ interface Props {
 }
 
 const { lang, title } = Astro.props;
+const t = useTranslations(lang);
+
+// Anteprima dei link: titolo, frase del ruolo nella lingua della pagina e
+// la scheda generata da scripts/social-card.mjs. Gli URL devono essere
+// assoluti, altrimenti WhatsApp e LinkedIn non caricano l'immagine.
+const fullTitle = `${title} — Adriano Parmentola`;
+const description = `Adriano Parmentola. ${t('home.role')}`;
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const ogImage = new URL('/og.jpg', Astro.site).href;
+const OG_LOCALE = { en: 'en_GB', it: 'it_IT', es: 'es_ES' } as const;
 ---
 
 <!doctype html>
@@ -17,11 +27,25 @@ const { lang, title } = Astro.props;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{title} — Adriano Parmentola</title>
-    <meta
-      name="description"
-      content="Adriano Parmentola — service design portfolio and hospitality consulting."
-    />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#f6f5f1" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Adriano Parmentola" />
+    <meta property="og:locale" content={OG_LOCALE[lang]} />
+    <meta property="og:title" content={fullTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
     <ClientRouter />
     <noscript>
       <style>
